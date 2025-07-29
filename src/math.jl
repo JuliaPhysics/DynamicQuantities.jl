@@ -57,6 +57,13 @@ for (type, base_type, _) in ABSTRACT_QUANTITY_TYPES
     end
 end
 
+# Deal with ambiguous QuantityArray operations:
+Base.:*(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = QuantityArray(A, q)
+Base.:*(q::AbstractRealQuantity, A::StepRangeLen{<:Real, <:Base.TwicePrecision}) = A * q
+Base.:/(A::BitArray, q::AbstractRealQuantity) = A * inv(q)
+Base.:/(A::BitArray, q::AbstractQuantity) = A * inv(q)
+Base.:/(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = A * inv(q)
+
 Base.:*(l::AbstractDimensions, r::AbstractDimensions) = map_dimensions(+, l, r)
 Base.:/(l::AbstractDimensions, r::AbstractDimensions) = map_dimensions(-, l, r)
 

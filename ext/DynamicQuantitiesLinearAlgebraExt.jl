@@ -2,12 +2,28 @@ module DynamicQuantitiesLinearAlgebraExt
 
 using LinearAlgebra: LinearAlgebra as LA
 using DynamicQuantities
-using DynamicQuantities: DynamicQuantities as DQ, quantity_type, new_quantity, DimensionError
+using DynamicQuantities: DynamicQuantities as DQ, quantity_type, new_quantity, DimensionError, ABSTRACT_QUANTITY_TYPES
 using TestItems: @testitem
 
 DQ.is_ext_loaded(::Val{:LinearAlgebra}) = true
 DQ.norm(u) = LA.norm(u)
 LA.norm(q::UnionAbstractQuantity, p::Real=2) = new_quantity(typeof(q), LA.norm(ustrip(q), p), dimension(q))
+
+const ARRAY_TYPES_CONCRETE = (
+    LA.Bidiagonal,
+    LA.Diagonal,
+    LA.Hermitian,
+    LA.LowerTriangular,
+    LA.LowerTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+    LA.Symmetric,
+    LA.SymTridiagonal,
+    LA.Tridiagonal,
+    LA.UnitLowerTriangular,
+    LA.UnitUpperTriangular,
+    LA.UpperTriangular,
+    LA.UpperTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+    LA.UpperHessenberg,
+)
 
 # Deal with ambiguous array operations:
 for op in (:(Base.:*), :(Base.:/), :(Base.:\)),
@@ -33,6 +49,16 @@ for op in (:(Base.:*), :(Base.:/), :(Base.:\)),
     (L, R) in ((Q_ARRAY_TYPE, ARRAY_TYPE), (ARRAY_TYPE, Q_ARRAY_TYPE))
 
     @eval $op(l::$L, r::$R) = DQ.array_op($op, l, r)
+end
+
+for ARRAY_TYPE in ARRAY_TYPES_CONCRETE,
+    (type, base_type, ) in ABSTRACT_QUANTITY_TYPES
+
+    @eval begin
+        Base.:*(A::$ARRAY_TYPE, q::$type) = QuantityArray(A, q)
+        Base.:*(q::$type, A::$ARRAY_TYPE) = QuantityArray(A, q)
+        Base.:/(A::$ARRAY_TYPE, q::$type) = A * inv(q)
+    end
 end
 
 function Base.:*(
