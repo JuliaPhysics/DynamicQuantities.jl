@@ -24,7 +24,7 @@ DynamicQuantitiesScientificTypesExt = "ScientificTypes"
 DynamicQuantitiesUnitfulExt = "Unitful"
 
 [compat]
-Dates = "1.11.0"
+Dates = "1"
 DispatchDoctor = "0.4"
 LinearAlgebra = "1"
 Measurements = "2"
