@@ -31,7 +31,7 @@ end
 makedocs(;
     modules=[DynamicQuantities, DynamicQuantities.Units],
     authors="MilesCranmer <miles.cranmer@gmail.com> and contributors",
-    repo="https://github.com/SymbolicML/DynamicQuantities.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/JuliaPhysics/DynamicQuantities.jl/blob/{commit}{path}#{line}",
     sitename="DynamicQuantities.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
@@ -52,7 +52,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/SymbolicML/DynamicQuantities.jl",
+    repo="github.com/JuliaPhysics/DynamicQuantities.jl",
     devbranch="main"
 )
 
