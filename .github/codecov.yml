@@ -1,0 +1,9 @@
+codecov:
+  token: 1034de58-4389-4c80-afdf-600d4669ad66
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
