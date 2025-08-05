@@ -51,9 +51,9 @@ for (type, base_type, _) in ABSTRACT_QUANTITY_TYPES
         end
 
         # Defining here instead of outside loop with UnionAbstractQuantity to avoid method ambiguities
-        Base.:*(A::AbstractArray, q::$type) = QuantityArray(A, q)
-        Base.:*(q::$type, A::AbstractArray) = A * q
-        Base.:/(A::AbstractArray, q::$type) = A * inv(q)
+        Base.:*(A::AbstractArray{T}, q::$type) where {T<:Number} = QuantityArray(A, q)
+        Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
+        Base.:/(A::AbstractArray{T}, q::$type) where {T<:Number} = A * inv(q)
     end
 end
 
