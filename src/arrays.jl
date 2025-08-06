@@ -69,10 +69,6 @@ for (type, base_type, default_type) in ABSTRACT_QUANTITY_TYPES
         @eval QuantityArray(v::AbstractArray{<:$base_type}, d::AbstractDimensions) = QuantityArray(v, d, $default_type)
     end
 
-    # Eagerly construct a `QuantityArray` from the following:
-    #     ∘ array * unit
-    #     ∘ unit * array
-    #     ∘ array / unit
     @eval begin
         Base.:*(A::AbstractArray{T}, q::$type) where {T<:Number} = QuantityArray(A, q)
         Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
@@ -458,13 +454,6 @@ for op in (:(Base.:*), :(Base.:/), :(Base.:\))
         # smart enough to inline it and see it is a non-op?
     end
 end
-
-# Cover method ambiguities from, e.g., op(::Array, ::Quantity)::QuantityArray`
-Base.:*(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = QuantityArray(A, q)
-Base.:*(q::AbstractRealQuantity, A::StepRangeLen{<:Real, <:Base.TwicePrecision}) = A * q
-Base.:/(A::BitArray, q::AbstractRealQuantity) = A * inv(q)
-Base.:/(A::BitArray, q::AbstractQuantity) = A * inv(q)
-Base.:/(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = A * inv(q)
 
 @testitem "Basic linear algebra operations" begin
     using DynamicQuantities
