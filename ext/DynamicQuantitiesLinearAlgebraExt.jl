@@ -9,22 +9,6 @@ DQ.is_ext_loaded(::Val{:LinearAlgebra}) = true
 DQ.norm(u) = LA.norm(u)
 LA.norm(q::UnionAbstractQuantity, p::Real=2) = new_quantity(typeof(q), LA.norm(ustrip(q), p), dimension(q))
 
-const ARRAY_TYPES_CONCRETE = (
-    LA.Bidiagonal,
-    LA.Diagonal,
-    LA.Hermitian,
-    LA.LowerTriangular,
-    LA.LowerTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
-    LA.Symmetric,
-    LA.SymTridiagonal,
-    LA.Tridiagonal,
-    LA.UnitLowerTriangular,
-    LA.UnitUpperTriangular,
-    LA.UpperTriangular,
-    LA.UpperTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
-    LA.UpperHessenberg,
-)
-
 # Deal with ambiguous array operations:
 for op in (:(Base.:*), :(Base.:/), :(Base.:\)),
     Q_ARRAY_TYPE in (:(QuantityArray{<:Any,1}), :(QuantityArray{<:Any,2})),
@@ -51,7 +35,21 @@ for op in (:(Base.:*), :(Base.:/), :(Base.:\)),
     @eval $op(l::$L, r::$R) = DQ.array_op($op, l, r)
 end
 
-for ARRAY_TYPE in ARRAY_TYPES_CONCRETE,
+for ARRAY_TYPE in (
+        LA.Bidiagonal,
+        LA.Diagonal,
+        LA.Hermitian,
+        LA.LowerTriangular,
+        LA.LowerTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+        LA.Symmetric,
+        LA.SymTridiagonal,
+        LA.Tridiagonal,
+        LA.UnitLowerTriangular,
+        LA.UnitUpperTriangular,
+        LA.UpperTriangular,
+        LA.UpperTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+        LA.UpperHessenberg,
+    ),
     (type, base_type, ) in ABSTRACT_QUANTITY_TYPES
 
     @eval begin

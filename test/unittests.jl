@@ -352,6 +352,14 @@ end
     @test norm(GenericQuantity(ustrip.(x), length=1, time=-1), 2) ≈ norm(ustrip.(x), 2) * u"m/s"
 
     @test ustrip(x') == ustrip(x)'
+
+    # With BitArray and RealQuantity:
+    T_QA_AbstractArray = QuantityArray{T, 2, D, Q, V} where {T, D<:Dimensions, Q<:UnionAbstractQuantity, V<:AbstractArray}
+    T_QA_s_AbstractArray = QuantityArray{T, 2, D, Q, V} where {T, D<:SymbolicDimensions, Q<:UnionAbstractQuantity, V<:AbstractArray}
+
+    @test BitArray([1 0 1 0]) / u"m" isa T_QA_AbstractArray
+    @test BitArray([1 0 1 0]) / us"m" isa T_QA_s_AbstractArray
+    @test BitArray([1 0 1 0]) / RealQuantity(u"m") isa T_QA_AbstractArray
 end
 
 @testset "Ranges" begin
@@ -453,9 +461,16 @@ end
         @test length(x) == 4
 
         # With RealQuantity:
-        @test_skip (1.0:4.0) * RealQuantity(u"inch") isa T_QA_s_StepRangeLen
+        @test_skip (1.0:4.0) * RealQuantity(u"inch") isa StepRangeLen{<:RealQuantity{Float64,<:SymbolicDimensions}}
         # TODO: This is not available as TwicePrecision interacts with Real in a way
         #       that demands many other functions to be defined.
+        @test (1.0:4.0) / RealQuantity(u"inch") isa T_QA_StepRangeLen
+        @test (1.0:4.0) * RealQuantity(u"inch") isa T_QA_StepRangeLen
+        @test RealQuantity(u"inch") * (1.0:4.0) isa T_QA_StepRangeLen
+
+        @test (1.0:4.0) / RealQuantity(us"inch") isa T_QA_s_StepRangeLen
+        @test (1.0:4.0) * RealQuantity(us"inch") isa T_QA_s_StepRangeLen
+        @test RealQuantity(us"inch") * (1.0:4.0) isa T_QA_s_StepRangeLen
     end
 end
 

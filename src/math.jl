@@ -49,20 +49,8 @@ for (type, base_type, _) in ABSTRACT_QUANTITY_TYPES
         function Base.:/(l::AbstractDimensions, r::$type)
             new_quantity(typeof(r), inv(ustrip(r)), l / dimension(r))
         end
-
-        # Defining here instead of outside loop with UnionAbstractQuantity to avoid method ambiguities
-        Base.:*(A::AbstractArray{T}, q::$type) where {T<:Number} = QuantityArray(A, q)
-        Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
-        Base.:/(A::AbstractArray{T}, q::$type) where {T<:Number} = A * inv(q)
     end
 end
-
-# Deal with ambiguous QuantityArray operations:
-Base.:*(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = QuantityArray(A, q)
-Base.:*(q::AbstractRealQuantity, A::StepRangeLen{<:Real, <:Base.TwicePrecision}) = A * q
-Base.:/(A::BitArray, q::AbstractRealQuantity) = A * inv(q)
-Base.:/(A::BitArray, q::AbstractQuantity) = A * inv(q)
-Base.:/(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = A * inv(q)
 
 Base.:*(l::AbstractDimensions, r::AbstractDimensions) = map_dimensions(+, l, r)
 Base.:/(l::AbstractDimensions, r::AbstractDimensions) = map_dimensions(-, l, r)

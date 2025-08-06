@@ -14,7 +14,7 @@ and so can be used in most places where a normal array would be used, including 
 
 # Constructors
 
-The most convenient way to create a `QuantityArray` is by multiplying your array-like object by the desired dimension(s), e.g.,
+The most convenient way to create a `QuantityArray` is by multiplying your array-like object by the desired units, e.g.,
 
 ```julia
 x = [3, 4, 5]u"km/s"
@@ -67,6 +67,16 @@ for (type, base_type, default_type) in ABSTRACT_QUANTITY_TYPES
     # Only define defaults for Quantity and GenericQuantity. Other types, the user needs to declare explicitly.
     if type in (AbstractQuantity, AbstractGenericQuantity)
         @eval QuantityArray(v::AbstractArray{<:$base_type}, d::AbstractDimensions) = QuantityArray(v, d, $default_type)
+    end
+
+    # Eagerly construct a `QuantityArray` from the following:
+    #     ∘ array * unit
+    #     ∘ unit * array
+    #     ∘ array / unit
+    @eval begin
+        Base.:*(A::AbstractArray{T}, q::$type) where {T<:Number} = QuantityArray(A, q)
+        Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
+        Base.:/(A::AbstractArray{T}, q::$type) where {T<:Number} = A * inv(q)
     end
 end
 QuantityArray(v::QA) where {Q<:UnionAbstractQuantity,QA<:AbstractArray{Q}} =
@@ -448,6 +458,13 @@ for op in (:(Base.:*), :(Base.:/), :(Base.:\))
         # smart enough to inline it and see it is a non-op?
     end
 end
+
+# Cover method ambiguities from, e.g., op(::Array, ::Quantity)::QuantityArray`
+Base.:*(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = QuantityArray(A, q)
+Base.:*(q::AbstractRealQuantity, A::StepRangeLen{<:Real, <:Base.TwicePrecision}) = A * q
+Base.:/(A::BitArray, q::AbstractRealQuantity) = A * inv(q)
+Base.:/(A::BitArray, q::AbstractQuantity) = A * inv(q)
+Base.:/(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = A * inv(q)
 
 @testitem "Basic linear algebra operations" begin
     using DynamicQuantities
