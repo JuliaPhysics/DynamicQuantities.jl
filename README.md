@@ -5,7 +5,7 @@
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://symbolicml.org/DynamicQuantities.jl/dev/)
 [![Build Status](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://coveralls.io/repos/github/JuliaPhysics/DynamicQuantities.jl/badge.svg?branch=main)](https://coveralls.io/github/JuliaPhysics/DynamicQuantities.jl?branch=main)
+[![Coverage](https://codecov.io/gh/JuliaPhysics/DynamicQuantities.jl/graph/badge.svg)](https://app.codecov.io/gh/JuliaPhysics/DynamicQuantities.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 </div>
