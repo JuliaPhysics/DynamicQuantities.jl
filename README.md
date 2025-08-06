@@ -1,11 +1,11 @@
 <div align="center">
 
-<img src="https://github.com/SymbolicML/DynamicQuantities.jl/assets/7593028/10b1e6b8-f1c5-43bc-97e6-4ddb4c175293" width=500>
+<img src="https://github.com/JuliaPhysics/DynamicQuantities.jl/assets/7593028/10b1e6b8-f1c5-43bc-97e6-4ddb4c175293" width=500>
 
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://symbolicml.org/DynamicQuantities.jl/dev/)
-[![Build Status](https://github.com/SymbolicML/DynamicQuantities.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/SymbolicML/DynamicQuantities.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://coveralls.io/repos/github/SymbolicML/DynamicQuantities.jl/badge.svg?branch=main)](https://coveralls.io/github/SymbolicML/DynamicQuantities.jl?branch=main)
+[![Build Status](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://coveralls.io/repos/github/JuliaPhysics/DynamicQuantities.jl/badge.svg?branch=main)](https://coveralls.io/github/JuliaPhysics/DynamicQuantities.jl?branch=main)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 </div>
