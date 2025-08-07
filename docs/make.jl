@@ -51,15 +51,18 @@ makedocs(;
     warnonly = [:missing_docs]
 )
 
-deploydocs(;
-    repo="github.com/JuliaPhysics/DynamicQuantities.jl",
-    devbranch="main"
-)
+in_CI_env = get(ENV, "CI", "false") == "true"
+if in_CI_ENV
+    deploydocs(;
+        repo="github.com/JuliaPhysics/DynamicQuantities.jl",
+        devbranch="main"
+    )
 
-# Mirror to DAMTP:
-ENV["DOCUMENTER_KEY"] = ENV["DOCUMENTER_KEY_CAM"]
-ENV["GITHUB_REPOSITORY"] = "ai-damtp-cam-ac-uk/dynamicquantities.git"
-deploydocs(;
-    repo="github.com/ai-damtp-cam-ac-uk/dynamicquantities.git",
-    devbranch="main"
-)
+    # Mirror to DAMTP:
+    ENV["DOCUMENTER_KEY"] = ENV["DOCUMENTER_KEY_CAM"]
+    ENV["GITHUB_REPOSITORY"] = "ai-damtp-cam-ac-uk/dynamicquantities.git"
+    deploydocs(;
+        repo="github.com/ai-damtp-cam-ac-uk/dynamicquantities.git",
+        devbranch="main"
+    )
+end
