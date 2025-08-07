@@ -52,7 +52,7 @@ makedocs(;
 )
 
 in_CI_env = get(ENV, "CI", "false") == "true"
-if in_CI_ENV
+if in_CI_env
     deploydocs(;
         repo="github.com/JuliaPhysics/DynamicQuantities.jl",
         devbranch="main"
