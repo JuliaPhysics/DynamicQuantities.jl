@@ -55,7 +55,8 @@ in_CI_env = get(ENV, "CI", "false") == "true"
 if in_CI_env
     deploydocs(;
         repo="github.com/JuliaPhysics/DynamicQuantities.jl",
-        devbranch="main"
+        devbranch="main",
+        push_preview=true
     )
 
     # Mirror to DAMTP:
@@ -63,6 +64,7 @@ if in_CI_env
     ENV["GITHUB_REPOSITORY"] = "ai-damtp-cam-ac-uk/dynamicquantities.git"
     deploydocs(;
         repo="github.com/ai-damtp-cam-ac-uk/dynamicquantities.git",
-        devbranch="main"
+        devbranch="main",
+        push_preview=true
     )
 end
