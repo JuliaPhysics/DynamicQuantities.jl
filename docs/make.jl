@@ -2,9 +2,9 @@ using DynamicQuantities
 using DynamicQuantities.Units
 using DynamicQuantities: constructorof, with_type_parameters, dimension_names
 using Documenter
+using Documenter.Remotes: GitHub
 
 DocMeta.setdocmeta!(DynamicQuantities, :DocTestSetup, :(using DynamicQuantities); recursive=true)
-doctest(DynamicQuantities)
 
 readme = open(dirname(@__FILE__) * "/../README.md") do io
     read(io, String)
@@ -31,7 +31,7 @@ end
 makedocs(;
     modules=[DynamicQuantities, DynamicQuantities.Units],
     authors="MilesCranmer <miles.cranmer@gmail.com> and contributors",
-    repo="https://github.com/JuliaPhysics/DynamicQuantities.jl/blob/{commit}{path}#{line}",
+    repo=GitHub("JuliaPhysics/DynamicQuantities.jl"),
     sitename="DynamicQuantities.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
@@ -51,15 +51,20 @@ makedocs(;
     warnonly = [:missing_docs]
 )
 
-deploydocs(;
-    repo="github.com/JuliaPhysics/DynamicQuantities.jl",
-    devbranch="main"
-)
+in_CI_env = get(ENV, "CI", "false") == "true"
+if in_CI_env
+    deploydocs(;
+        repo="github.com/JuliaPhysics/DynamicQuantities.jl",
+        devbranch="main",
+        push_preview=true
+    )
 
-# Mirror to DAMTP:
-ENV["DOCUMENTER_KEY"] = ENV["DOCUMENTER_KEY_CAM"]
-ENV["GITHUB_REPOSITORY"] = "ai-damtp-cam-ac-uk/dynamicquantities.git"
-deploydocs(;
-    repo="github.com/ai-damtp-cam-ac-uk/dynamicquantities.git",
-    devbranch="main"
-)
+    # Mirror to DAMTP:
+    ENV["DOCUMENTER_KEY"] = ENV["DOCUMENTER_KEY_CAM"]
+    ENV["GITHUB_REPOSITORY"] = "ai-damtp-cam-ac-uk/dynamicquantities.git"
+    deploydocs(;
+        repo="github.com/ai-damtp-cam-ac-uk/dynamicquantities.git",
+        devbranch="main",
+        push_preview=true
+    )
+end
