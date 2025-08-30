@@ -76,6 +76,30 @@ end
 end
 # TODO: functions on SVD type that are working: `size`, `adjoint`, partially working: `inv`, not working: `svdvals`, `ldiv!`.
 
+@testitem "QuantityArray construction" begin
+    using DynamicQuantities, LinearAlgebra
+
+    tname = nameof ∘ typeof
+    A = [1 0; 0 1]
+    @testset "$(tname(arr)) and $(tname(q))" for arr in (
+        Bidiagonal(A, :U),
+        Diagonal(A),
+        Hermitian(A),
+        LowerTriangular(A),
+        Symmetric(A),
+        SymTridiagonal(A),
+        Tridiagonal(A),
+        UnitLowerTriangular(A),
+        UnitUpperTriangular(A),
+        UpperTriangular(A),
+        UpperHessenberg(A),
+    ),
+        q in (u"m", GenericQuantity(1.5), RealQuantity(1.5))
+        @test arr * q == QuantityArray(A, q)
+        @test q * arr == QuantityArray(A, q)
+        @test arr / q == arr * inv(q)
+    end
+end
 
 @testitem "svd" begin
     using DynamicQuantities, LinearAlgebra
