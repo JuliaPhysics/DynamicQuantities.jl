@@ -238,6 +238,7 @@ the same dimension) by passing an array and a single quantity:
 
 ```julia
 x = QuantityArray(randn(32), u"km/s")
+# or x = randn(32)u"km/s"
 ```
 
 or, by passing an array of individual quantities:
@@ -272,6 +273,8 @@ This `QuantityArray` is useful for broadcasting:
 f_square(v) = v^2 * 1.5 - v^2
 println("Applying function to y_q: ", sum(f_square.(y_q)))
 ```
+
+See [Home > Arrays](index.md#Arrays) for more.
 
 ### Fill
 
