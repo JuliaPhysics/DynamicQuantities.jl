@@ -14,6 +14,14 @@ and so can be used in most places where a normal array would be used, including 
 
 # Constructors
 
+The most convenient way to create a `QuantityArray` is by multiplying your array-like object by the desired units, e.g.,
+
+```julia
+x = [3, 4, 5]u"km/s"
+```
+
+For more control, the following constructors are available:
+
 - `QuantityArray(v::AbstractArray, d::AbstractDimensions)`: Create a `QuantityArray` with value `v` and dimensions `d`,
   using `Quantity` if the eltype of `v` is numeric, and `GenericQuantity` otherwise.
 
@@ -70,6 +78,12 @@ for (type, base_type, default_type) in ABSTRACT_QUANTITY_TYPES
     # Only define defaults for Quantity and GenericQuantity. Other types, the user needs to declare explicitly.
     if type in (AbstractQuantity, AbstractGenericQuantity)
         @eval QuantityArray(v::AbstractArray{<:$base_type}, d::AbstractDimensions) = QuantityArray(v, d, $default_type)
+    end
+
+    @eval begin
+        Base.:*(A::AbstractArray{T}, q::$type) where {T<:Number} = QuantityArray(A, q)
+        Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
+        Base.:/(A::AbstractArray{T}, q::$type) where {T<:Number} = A * inv(q)
     end
 end
 QuantityArray(v::QA) where {Q<:UnionAbstractQuantity,QA<:AbstractArray{Q}} =

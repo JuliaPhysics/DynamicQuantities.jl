@@ -110,3 +110,9 @@ for (type, _, _) in ABSTRACT_QUANTITY_TYPES, numeric_type in (Bool, BigFloat)
         end
     end
 end
+# Cover method ambiguities from, e.g., op(::Array, ::Quantity)::QuantityArray`
+Base.:*(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = QuantityArray(A, q)
+Base.:*(q::AbstractRealQuantity, A::StepRangeLen{<:Real, <:Base.TwicePrecision}) = A * q
+Base.:/(A::BitArray, q::AbstractRealQuantity) = A * inv(q)
+Base.:/(A::BitArray, q::AbstractQuantity) = A * inv(q)
+Base.:/(A::StepRangeLen{<:Real, <:Base.TwicePrecision}, q::AbstractRealQuantity) = A * inv(q)
