@@ -65,7 +65,7 @@ function Base.:*(
 ) where {
     T2,D<:DQ.AbstractDimensions,Q<:DQ.AbstractRealQuantity{T2,D}
 }
-    return array_op(Base.:*, l, r)
+    return DQ.array_op(Base.:*, l, r)
 end
 
 
@@ -258,5 +258,15 @@ end
 end
 
 # TODO: Tests from missing parts of LinearAlgebra interface
+
+@testitem "transpose" begin
+    using DynamicQuantities, LinearAlgebra
+
+    v = QuantityArray([1, 2, 3], RealQuantity(u"m"))
+    square_norm = transpose(v) * v
+
+    @test square_norm == QuantityArray([14], RealQuantity(u"m^2"))
+    @test length(square_norm) == 1
+end
 
 end
