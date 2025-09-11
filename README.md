@@ -366,12 +366,12 @@ So we can see the `QuantityArray` version saves on both time and memory.
 
 By default, DynamicQuantities will create a `QuantityArray` from an `AbstractArray`, similarly to how a `Quantity` is created from a scalar in the [Usage](@ref) examples:
 
-```julia
-julia> x = [0.3, 0.4, 0.5]u"km/s"
-3-element QuantityArray(::Vector{Float64}, ::Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}):
- 300.0 m s⁻¹
- 400.0 m s⁻¹
- 500.0 m s⁻¹
+```julia-repl
+julia> x = (1:3)us"km/h"
+3-element QuantityArray(::StepRangeLen{Float64, ...}, ::Quantity{Float64, SymbolicDimensions{...}}):
+ 1.0 km h⁻¹
+ 2.0 km h⁻¹
+ 3.0 km h⁻¹
 ```
 
 ### Unitful
