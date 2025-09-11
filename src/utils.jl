@@ -208,7 +208,7 @@ Base.keys(q::UnionAbstractQuantity) = keys(ustrip(q))
 end
 
 # Numeric checks
-for op in (:(<=), :(<), :(>=), :(>), :isless), (type, true_base_type, _) in ABSTRACT_QUANTITY_TYPES
+for op in (:(<=), :(<), :isless), (type, true_base_type, _) in ABSTRACT_QUANTITY_TYPES
     # Avoid creating overly generic operations on these:
     base_type = true_base_type <: Number ? true_base_type : Number
     @eval begin
@@ -243,7 +243,7 @@ for op in (:isequal, :(==)), (type, true_base_type, _) in ABSTRACT_QUANTITY_TYPE
         end
     end
 end
-for op in (:(<=), :(<), :(>=), :(>), :isless, :isgreater, :isequal, :(==)),
+for op in (:(<=), :(<), :isless, :isequal, :(==)),
     (t1, _, _) in ABSTRACT_QUANTITY_TYPES,
     (t2, _, _) in ABSTRACT_QUANTITY_TYPES
 
