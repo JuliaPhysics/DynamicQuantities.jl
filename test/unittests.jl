@@ -466,6 +466,37 @@ end
         @test (1.0:4.0) * RealQuantity(us"inch") isa QuantityArray
         @test RealQuantity(us"inch") * (1.0:4.0) isa QuantityArray
     end
+
+    @testset "Array of quantities multiplication behavior" begin
+        # Test that array of quantities * quantity does NOT create nested QuantityArray
+        # but instead broadcasts properly
+
+        # Test all combinations of quantity types
+        for (Q1, Q2) in [(Quantity, Quantity), (Quantity, RealQuantity),
+                         (RealQuantity, Quantity), (RealQuantity, RealQuantity),
+                         (GenericQuantity, GenericQuantity), (GenericQuantity, Quantity)]
+
+            # Create array of Q1 quantities
+            arr = [Q1(1.0u"m"), Q1(2.0u"m"), Q1(3.0u"m")]
+            q = Q2(1.0u"s")
+
+            # Test array * quantity
+            result1 = arr * q
+            @test result1 isa Vector  # Should be Vector, not QuantityArray
+            @test length(result1) == 3
+            @test dimension(result1[1]) == dimension(u"m*s")
+
+            # Test quantity * array
+            result2 = q * arr
+            @test result2 isa Vector
+            @test dimension(result2[1]) == dimension(u"m*s")
+
+            # Test division
+            result3 = arr / q
+            @test result3 isa Vector
+            @test dimension(result3[1]) == dimension(u"m/s")
+        end
+    end
 end
 
 @testset "Alternate dimension construction" begin

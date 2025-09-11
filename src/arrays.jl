@@ -85,6 +85,14 @@ for (type, base_type, default_type) in ABSTRACT_QUANTITY_TYPES
         Base.:*(q::$type, A::AbstractArray{T}) where {T<:Number} = A * q
         Base.:/(A::AbstractArray{T}, q::$type) where {T<:Number} = A * inv(q)
     end
+
+    for (type2, _, _) in ABSTRACT_QUANTITY_TYPES
+        @eval begin
+            Base.:*(A::AbstractArray{<:$type2}, q::$type) = A .* q
+            Base.:*(q::$type, A::AbstractArray{<:$type2}) = q .* A
+            Base.:/(A::AbstractArray{<:$type2}, q::$type) = A ./ q
+        end
+    end
 end
 QuantityArray(v::QA) where {Q<:UnionAbstractQuantity,QA<:AbstractArray{Q}} =
     let
