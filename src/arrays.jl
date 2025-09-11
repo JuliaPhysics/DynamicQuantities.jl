@@ -14,13 +14,13 @@ and so can be used in most places where a normal array would be used, including 
 
 # Constructors
 
-The most convenient way to create a `QuantityArray` is by multiplying your array-like object by the desired units, e.g.,
+You can create a `QuantityArray` by multiplying an array with a `Quantity`:
 
 ```julia
-x = [3, 4, 5]u"km/s"
+x = (0:0.1:10)u"km/s"
 ```
 
-For more control, the following constructors are available:
+Alternatively, the following constructors are available:
 
 - `QuantityArray(v::AbstractArray, d::AbstractDimensions)`: Create a `QuantityArray` with value `v` and dimensions `d`,
   using `Quantity` if the eltype of `v` is numeric, and `GenericQuantity` otherwise.
