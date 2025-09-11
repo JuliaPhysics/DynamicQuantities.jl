@@ -50,11 +50,11 @@ for ARRAY_TYPE in (
         LA.UpperTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
         LA.UpperHessenberg,
     ),
-    (type, base_type, ) in ABSTRACT_QUANTITY_TYPES
+    (type, _, _) in ABSTRACT_QUANTITY_TYPES
 
     @eval begin
         Base.:*(A::$ARRAY_TYPE, q::$type) = QuantityArray(A, q)
-        Base.:*(q::$type, A::$ARRAY_TYPE) = QuantityArray(A, q)
+        Base.:*(q::$type, A::$ARRAY_TYPE) = A * q
         Base.:/(A::$ARRAY_TYPE, q::$type) = A * inv(q)
     end
 end
