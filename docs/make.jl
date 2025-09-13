@@ -4,6 +4,8 @@ using DynamicQuantities: constructorof, with_type_parameters, dimension_names
 using Documenter
 using Documenter.Remotes: GitHub
 
+import Base: titlecase
+
 DocMeta.setdocmeta!(DynamicQuantities, :DocTestSetup, :(using DynamicQuantities); recursive=true)
 
 readme = open(dirname(@__FILE__) * "/../README.md") do io
