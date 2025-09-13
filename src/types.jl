@@ -4,7 +4,21 @@ else
     @eval const static_fieldnames = fieldnames
 end
 
-const DEFAULT_DIM_BASE_TYPE = FixedRational{DEFAULT_NUMERATOR_TYPE,DEFAULT_DENOM}
+"""
+    FRInt32
+
+FixedRational with Int32 numerator and denominator 25200.
+"""
+const FRInt32 = FixedRational{DEFAULT_NUMERATOR_TYPE,DEFAULT_DENOM}
+
+"""
+    FRInt8
+
+FixedRational with Int8 numerator and denominator 12.
+"""
+const FRInt8 = FixedRational{Int8, 12}
+
+const DEFAULT_DIM_BASE_TYPE = FRInt32
 const DEFAULT_VALUE_TYPE = Float64
 
 """

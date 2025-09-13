@@ -737,6 +737,15 @@ end
     x = 10u"m"
     user_quantity = Quantity(10.0, Dimensions{FixedRational{Int32,25200}}(1, 0, 0, 0, 0, 0, 0))
     @test x == user_quantity
+
+    @testset "FRInt32 and FRInt8 type aliases" begin
+        @test FRInt32 === FixedRational{Int32, 25200}
+        @test FRInt8 === FixedRational{Int8, 12}
+        @test DEFAULT_DIM_BASE_TYPE === FRInt32
+
+        @test string(FRInt32) == "FRInt32"
+        @test string(FRInt8) == "FRInt8"
+    end
 end
 
 @testset "Quantity promotion" begin

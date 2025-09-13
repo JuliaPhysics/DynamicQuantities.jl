@@ -423,13 +423,13 @@ julia> total_cookies = cookie_rate * total_milk
 92.7 cookies
 ```
 
-Exponents are tracked by default with the type `R = FixedRational{Int32,C}`,
-which represents rational numbers with a fixed denominator `C`.
+Exponents are tracked by default with the type `FRInt32` (alias for `FixedRational{Int32, 25200}`),
+which represents rational numbers with an integer numerator and fixed denominator.
 This is much faster than `Rational`.
 
 ```julia
 julia> typeof(0.5u"kg")
-Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float64, Dimensions{FRInt32}}
 ```
 
 You can change the type of the value field by initializing with a value
@@ -437,17 +437,18 @@ explicitly of the desired type.
 
 ```julia
 julia> typeof(Quantity(Float16(0.5), mass=1, length=1))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
 or by conversion:
 
 ```julia
 julia> typeof(convert(Quantity{Float16}, 0.5u"m/s"))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
-For many applications, `FixedRational{Int8,6}` will suffice,
+For many applications, using `FRInt8` (alias for `FixedRational{Int8,12}`)
+will suffice as the base dimensions type,
 and can be faster as it means the entire `Dimensions`
 struct will fit into 64 bits.
 You can change the type of the dimensions field by passing
@@ -456,9 +457,9 @@ the type you wish to use as the second argument to `Quantity`:
 ```julia
 julia> using DynamicQuantities
 
-julia> R8 = Dimensions{FixedRational{Int8,6}};
+julia> R8 = Dimensions{FRInt8};
 
-julia> R32 = Dimensions{FixedRational{Int32,2^4 * 3^2 * 5^2 * 7}};  # Default
+julia> R32 = Dimensions{FRInt32};
 
 julia> q8 = [Quantity{Float64,R8}(randn(), length=rand(-2:2)) for i in 1:1000];
 
