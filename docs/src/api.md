@@ -34,5 +34,7 @@ Filter  = t -> !(t in [ustrip, dimension, ulength, umass, utime, ucurrent, utemp
 
 ```@docs
 FixedRational
+FRInt32
+FRInt8
 DynamicQuantities.denom
 ```

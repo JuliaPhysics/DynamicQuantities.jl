@@ -2,7 +2,7 @@ module DynamicQuantitiesLinearAlgebraExt
 
 using LinearAlgebra: LinearAlgebra as LA
 using DynamicQuantities
-using DynamicQuantities: DynamicQuantities as DQ, quantity_type, new_quantity, DimensionError
+using DynamicQuantities: DynamicQuantities as DQ, quantity_type, new_quantity, DimensionError, ABSTRACT_QUANTITY_TYPES
 using TestItems: @testitem
 
 DQ.is_ext_loaded(::Val{:LinearAlgebra}) = true
@@ -35,13 +35,37 @@ for op in (:(Base.:*), :(Base.:/), :(Base.:\)),
     @eval $op(l::$L, r::$R) = DQ.array_op($op, l, r)
 end
 
+for ARRAY_TYPE in (
+        LA.Bidiagonal,
+        LA.Diagonal,
+        LA.Hermitian,
+        LA.LowerTriangular,
+        LA.LowerTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+        LA.Symmetric,
+        LA.SymTridiagonal,
+        LA.Tridiagonal,
+        LA.UnitLowerTriangular,
+        LA.UnitUpperTriangular,
+        LA.UpperTriangular,
+        LA.UpperTriangular{<:Any, <:Union{LA.Adjoint{<:Any, <:StridedMatrix{T}}, LA.Transpose{<:Any, <:StridedMatrix{T}}, StridedArray{T, 2}} where T},
+        LA.UpperHessenberg,
+    ),
+    (type, _, _) in ABSTRACT_QUANTITY_TYPES
+
+    @eval begin
+        Base.:*(A::$ARRAY_TYPE, q::$type) = QuantityArray(A, q)
+        Base.:*(q::$type, A::$ARRAY_TYPE) = A * q
+        Base.:/(A::$ARRAY_TYPE, q::$type) = A * inv(q)
+    end
+end
+
 function Base.:*(
     l::LA.Transpose{Q,<:AbstractVector},
     r::DQ.QuantityArray{T2,1,D,Q,<:AbstractVector{T2}}
 ) where {
     T2,D<:DQ.AbstractDimensions,Q<:DQ.AbstractRealQuantity{T2,D}
 }
-    return array_op(Base.:*, l, r)
+    return DQ.array_op(Base.:*, l, r)
 end
 
 
@@ -52,6 +76,30 @@ end
 end
 # TODO: functions on SVD type that are working: `size`, `adjoint`, partially working: `inv`, not working: `svdvals`, `ldiv!`.
 
+@testitem "QuantityArray construction" begin
+    using DynamicQuantities, LinearAlgebra
+
+    tname = nameof ∘ typeof
+    A = [1 0; 0 1]
+    @testset "$(tname(arr)) and $(tname(q))" for arr in (
+        Bidiagonal(A, :U),
+        Diagonal(A),
+        Hermitian(A),
+        LowerTriangular(A),
+        Symmetric(A),
+        SymTridiagonal(A),
+        Tridiagonal(A),
+        UnitLowerTriangular(A),
+        UnitUpperTriangular(A),
+        UpperTriangular(A),
+        UpperHessenberg(A),
+    ),
+        q in (u"m", GenericQuantity(1.5), RealQuantity(1.5))
+        @test arr * q == QuantityArray(A, q)
+        @test q * arr == QuantityArray(A, q)
+        @test arr / q == arr * inv(q)
+    end
+end
 
 @testitem "svd" begin
     using DynamicQuantities, LinearAlgebra
@@ -210,5 +258,15 @@ end
 end
 
 # TODO: Tests from missing parts of LinearAlgebra interface
+
+@testitem "transpose" begin
+    using DynamicQuantities, LinearAlgebra
+
+    v = QuantityArray([1, 2, 3], RealQuantity(u"m"))
+    square_norm = transpose(v) * v
+
+    @test square_norm == QuantityArray([14], RealQuantity(u"m^2"))
+    @test length(square_norm) == 1
+end
 
 end

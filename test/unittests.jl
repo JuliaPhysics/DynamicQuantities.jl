@@ -288,9 +288,9 @@ end
         @test ustrip(x + ones(T, 32))[32] == 2
         @test typeof(x + ones(T, 32)) <: GenericQuantity{Vector{T}}
         @test typeof(x - ones(T, 32)) <: GenericQuantity{Vector{T}}
-        @test typeof(ones(T, 32) * GenericQuantity(T(1), D, length=1)) <: GenericQuantity{Vector{T}}
-        @test typeof(ones(T, 32) / GenericQuantity(T(1), D, length=1)) <: GenericQuantity{Vector{T}}
-        @test ones(T, 32) / GenericQuantity(T(1), length=1) == GenericQuantity(ones(T, 32), length=-1)
+        @test typeof(ones(T, 32) * GenericQuantity(T(1), D, length=1)) <: QuantityArray
+        @test typeof(ones(T, 32) / GenericQuantity(T(1), D, length=1)) <: QuantityArray
+        @test ones(T, 32) / GenericQuantity(T(1), length=1) == QuantityArray(ones(T, 32), GenericQuantity(T(1), length=-1))
     end
 
     @testset "isapprox" begin
@@ -351,6 +351,11 @@ end
     @test norm(GenericQuantity(ustrip.(x), length=1, time=-1), 2) ≈ norm(ustrip.(x), 2) * u"m/s"
 
     @test ustrip(x') == ustrip(x)'
+
+    # With BitArray and RealQuantity:
+    @test BitArray([1 0 1 0]) / u"m" isa QuantityArray
+    @test BitArray([1 0 1 0]) / us"m" isa QuantityArray
+    @test BitArray([1 0 1 0]) / RealQuantity(u"m") isa QuantityArray
 end
 
 @testset "Ranges" begin
@@ -397,7 +402,7 @@ end
     @testset "Multiplying ranges with units" begin
         # Test multiplying ranges with units
         x = (1:0.25:4)u"inch"
-        @test x isa StepRangeLen
+        @test x isa QuantityArray
         @test first(x) == 1u"inch"
         @test x[2] == 1.25u"inch"
         @test last(x) == 4u"inch"
@@ -405,7 +410,7 @@ end
 
         # Integer range (but real-valued unit)
         x = (1:4)u"inch"
-        @test x isa StepRangeLen
+        @test x isa QuantityArray
         @test first(x) == 1u"inch"
         @test x[2] == 2u"inch"
         @test last(x) == 4u"inch"
@@ -414,7 +419,7 @@ end
 
         # Test with floating point range
         x = (1.0:0.5:3.0)u"m"
-        @test x isa StepRangeLen
+        @test x isa QuantityArray
         @test first(x) == 1.0u"m"
         @test x[2] == 1.5u"m"
         @test last(x) == 3.0u"m"
@@ -427,7 +432,7 @@ end
 
         # Test with symbolic units
         x = (1:0.25:4)us"inch"
-        @test x isa StepRangeLen{<:Quantity{Float64,<:SymbolicDimensions}}
+        @test x isa QuantityArray
         @test first(x) == us"inch"
         @test x[2] == 1.25us"inch"
         @test last(x) == 4us"inch"
@@ -435,7 +440,7 @@ end
 
         # Test that symbolic units preserve their symbolic nature
         x = (0:0.1:1)us"km/h"
-        @test x isa AbstractRange
+        @test x isa QuantityArray
         @test first(x) == 0us"km/h"
         @test x[2] == 0.1us"km/h"
         @test last(x) == 1us"km/h"
@@ -443,7 +448,7 @@ end
 
         # Similarly, integers should stay integers:
         x = (1:4)us"inch"
-        @test_skip x isa StepRangeLen{<:Quantity{Int64,<:SymbolicDimensions}}
+        @test_skip x isa QuantityArray
         @test first(x) == us"inch"
         @test x[2] == 2us"inch"
         @test last(x) == 4us"inch"
@@ -453,6 +458,44 @@ end
         @test_skip (1.0:4.0) * RealQuantity(u"inch") isa StepRangeLen{<:RealQuantity{Float64,<:SymbolicDimensions}}
         # TODO: This is not available as TwicePrecision interacts with Real in a way
         #       that demands many other functions to be defined.
+        @test (1.0:4.0) / RealQuantity(u"inch") isa QuantityArray
+        @test (1.0:4.0) * RealQuantity(u"inch") isa QuantityArray
+        @test RealQuantity(u"inch") * (1.0:4.0) isa QuantityArray
+
+        @test (1.0:4.0) / RealQuantity(us"inch") isa QuantityArray
+        @test (1.0:4.0) * RealQuantity(us"inch") isa QuantityArray
+        @test RealQuantity(us"inch") * (1.0:4.0) isa QuantityArray
+    end
+
+    @testset "Array of quantities multiplication behavior" begin
+        # Test that array of quantities * quantity does NOT create nested QuantityArray
+        # but instead broadcasts properly
+
+        # Test all combinations of quantity types
+        for (Q1, Q2) in [(Quantity, Quantity), (Quantity, RealQuantity),
+                         (RealQuantity, Quantity), (RealQuantity, RealQuantity),
+                         (GenericQuantity, GenericQuantity), (GenericQuantity, Quantity)]
+
+            # Create array of Q1 quantities
+            arr = [Q1(1.0u"m"), Q1(2.0u"m"), Q1(3.0u"m")]
+            q = Q2(1.0u"s")
+
+            # Test array * quantity
+            result1 = arr * q
+            @test result1 isa Vector  # Should be Vector, not QuantityArray
+            @test length(result1) == 3
+            @test dimension(result1[1]) == dimension(u"m*s")
+
+            # Test quantity * array
+            result2 = q * arr
+            @test result2 isa Vector
+            @test dimension(result2[1]) == dimension(u"m*s")
+
+            # Test division
+            result3 = arr / q
+            @test result3 isa Vector
+            @test dimension(result3[1]) == dimension(u"m/s")
+        end
     end
 end
 
@@ -694,6 +737,15 @@ end
     x = 10u"m"
     user_quantity = Quantity(10.0, Dimensions{FixedRational{Int32,25200}}(1, 0, 0, 0, 0, 0, 0))
     @test x == user_quantity
+
+    @testset "FRInt32 and FRInt8 type aliases" begin
+        @test FRInt32 === FixedRational{Int32, 25200}
+        @test FRInt8 === FixedRational{Int8, 12}
+        @test DEFAULT_DIM_BASE_TYPE === FRInt32
+
+        @test occursin("FRInt32", string(FRInt32))
+        @test occursin("FRInt8", string(FRInt8))
+    end
 end
 
 @testset "Quantity promotion" begin
@@ -1639,7 +1691,7 @@ end
             io = IOBuffer()
             Base.showarg(io, z, true)
             msg = String(take!(io))
-            Q == Quantity && @test occursin(r"QuantityArray\(::Vector{Float64}, ::(DynamicQuantities\.)?Quantity{Float64, (DynamicQuantities\.)?SymbolicDimensions{(DynamicQuantities\.)?FixedRational{Int32, 25200}}}\)", msg)
+            Q == Quantity && @test occursin(r"QuantityArray\(::Vector{Float64}, ::(DynamicQuantities\.)?Quantity{Float64, (DynamicQuantities\.)?SymbolicDimensions{(DynamicQuantities\.)?FRInt32}}\)", msg)
 
             io = IOBuffer()
             Base.show(io, MIME"text/plain"(), typeof(z))

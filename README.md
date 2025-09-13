@@ -327,8 +327,8 @@ For working with an array of quantities that have the same dimensions,
 you can use a `QuantityArray`:
 
 ```julia-repl
-julia> ar = QuantityArray(rand(3), u"m/s")
-3-element QuantityArray(::Vector{Float64}, ::Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}):
+julia> ar = rand(3)u"m/s"
+3-element QuantityArray(::Vector{Float64}, ::Quantity{Float64, Dimensions{FRInt32}}):
  0.2729202669351497 m s⁻¹
  0.992546340360901 m s⁻¹
  0.16863543422972482 m s⁻¹
@@ -363,6 +363,16 @@ julia> @btime $f.(qa) setup=(xa = randn(100000) .* u"km/s"; qa = QuantityArray(x
 ```
 
 So we can see the `QuantityArray` version saves on both time and memory.
+
+By default, DynamicQuantities will create a `QuantityArray` from an `AbstractArray`, similarly to how a `Quantity` is created from a scalar in the [Usage](@ref) examples:
+
+```julia-repl
+julia> x = (1:3)us"km/h"
+3-element QuantityArray(::StepRangeLen{Float64, ...}, ::Quantity{Float64, SymbolicDimensions{...}}):
+ 1.0 km h⁻¹
+ 2.0 km h⁻¹
+ 3.0 km h⁻¹
+```
 
 ### Unitful
 
@@ -413,13 +423,13 @@ julia> total_cookies = cookie_rate * total_milk
 92.7 cookies
 ```
 
-Exponents are tracked by default with the type `R = FixedRational{Int32,C}`,
-which represents rational numbers with a fixed denominator `C`.
+Exponents are tracked by default with the type `FRInt32` (alias for `FixedRational{Int32, 25200}`),
+which represents rational numbers with an integer numerator and fixed denominator.
 This is much faster than `Rational`.
 
 ```julia-repl
 julia> typeof(0.5u"kg")
-Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float64, Dimensions{FRInt32}}
 ```
 
 You can change the type of the value field by initializing with a value
@@ -427,17 +437,18 @@ explicitly of the desired type.
 
 ```julia-repl
 julia> typeof(Quantity(Float16(0.5), mass=1, length=1))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
 or by conversion:
 
 ```julia-repl
 julia> typeof(convert(Quantity{Float16}, 0.5u"m/s"))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
-For many applications, `FixedRational{Int8,6}` will suffice,
+For many applications, using `FRInt8` (alias for `FixedRational{Int8,12}`)
+will suffice as the base dimensions type,
 and can be faster as it means the entire `Dimensions`
 struct will fit into 64 bits.
 You can change the type of the dimensions field by passing
@@ -446,9 +457,9 @@ the type you wish to use as the second argument to `Quantity`:
 ```julia-repl
 julia> using DynamicQuantities
 
-julia> R8 = Dimensions{FixedRational{Int8,6}};
+julia> R8 = Dimensions{FRInt8};
 
-julia> R32 = Dimensions{FixedRational{Int32,2^4 * 3^2 * 5^2 * 7}};  # Default
+julia> R32 = Dimensions{FRInt32};
 
 julia> q8 = [Quantity{Float64,R8}(randn(), length=rand(-2:2)) for i in 1:1000];
 
