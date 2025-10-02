@@ -260,7 +260,7 @@ end
     ustripexpand(q::AbstractQuantity)
     ustripexpand(q::QuantityArray)
 
-Return the value of `q` in SI base units. This is equivalent with `ustrip(uexpand(q))`.
+Return the value of `q` in SI base units. This is equivalent to `ustrip(uexpand(q))`.
 """
 ustripexpand(q::UnionAbstractQuantity) = ustrip(uexpand(q))
 ustripexpand(q::QuantityArray) = ustrip(uexpand(q))

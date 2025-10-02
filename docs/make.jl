@@ -16,6 +16,9 @@ readme = replace(readme, r"<img src=\"([^\"]+)\"[^>]+>.*" => s"![](\1)")
 # Then, we remove any line with "<div" on it:
 readme = replace(readme, r"<[/]?div.*" => s"")
 
+# Then, we titlecase the ToC entries to be compatible with Documenter.jl
+readme = replace(readme, r"\[(.*?)\]\(#(.*?)\)" => titlecase)
+
 # Finally, we read in file docs/src/index_base.md:
 index_base = open(dirname(@__FILE__) * "/src/index_base.md") do io
     read(io, String)

@@ -29,7 +29,7 @@ This can greatly improve both runtime performance, by avoiding type instabilitie
 DynamicQuantities can greatly outperform Unitful
 when the compiler cannot infer dimensions in a function:
 
-```julia
+```julia-repl
 julia> using BenchmarkTools, DynamicQuantities; import Unitful
 
 julia> dyn_uni = 0.2u"m/s"
@@ -54,7 +54,7 @@ while the Unitful quantity object, which stores its dimensions in the type, requ
 However, if the dimensions in your function *can* be inferred by the compiler,
 then you can get better speeds with Unitful:
 
-```julia
+```julia-repl
 julia> g(x) = x ^ 2 * 0.3;
 
 julia> @btime g($dyn_uni);
@@ -73,7 +73,7 @@ to units and the compiler can optimize away units from the code.
 You can create a `Quantity` object 
 by using the convenience macro `u"..."`:
 
-```julia
+```julia-repl
 julia> x = 0.3u"km/s"
 300.0 m s⁻¹
 
@@ -83,7 +83,7 @@ julia> y = 42 * u"kg"
 
 or by importing explicitly:
 
-```julia
+```julia-repl
 julia> using DynamicQuantities: kPa
 
 julia> room_temp = 100kPa
@@ -93,7 +93,7 @@ julia> room_temp = 100kPa
 Note that `Units` is an exported submodule, so you can
 also access this as `Units.kPa`. You may like to define
 
-```julia
+```julia-repl
 julia> const U = Units
 ```
 
@@ -106,14 +106,14 @@ You can also construct values explicitly with the `Quantity` type,
 with a value and keyword arguments for the powers of the physical dimensions
 (`mass`, `length`, `time`, `current`, `temperature`, `luminosity`, `amount`):
 
-```julia
+```julia-repl
 julia> x = Quantity(300.0, length=1, time=-1)
 300.0 m s⁻¹
 ```
 
 Elementary calculations with `+, -, *, /, ^, sqrt, cbrt, abs` are supported:
 
-```julia
+```julia-repl
 julia> x * y
 12600.0 m kg s⁻¹
 
@@ -137,7 +137,7 @@ Each of these values has the same type, which means we don't need to perform typ
 
 Furthermore, we can do dimensional analysis by detecting `DimensionError`:
 
-```julia
+```julia-repl
 julia> x + 3 * x
 1.2 m¹ᐟ² kg
 
@@ -147,14 +147,14 @@ ERROR: DimensionError: 0.3 m¹ᐟ² kg and 10.2 kg² s⁻² have incompatible di
 
 The dimensions of a `Quantity` can be accessed either with `dimension(quantity)` for the entire `Dimensions` object:
 
-```julia
+```julia-repl
 julia> dimension(x)
 m¹ᐟ² kg
 ```
 
 or with `umass`, `ulength`, etc., for the various dimensions:
 
-```julia
+```julia-repl
 julia> umass(x)
 1//1
 
@@ -164,7 +164,7 @@ julia> ulength(x)
 
 Finally, you can strip units with `ustrip`:
 
-```julia
+```julia-repl
 julia> ustrip(x)
 0.2
 ```
@@ -172,7 +172,7 @@ julia> ustrip(x)
 You can also convert a quantity to a desired unit and *then* strip the units
 using a two-argument version of `ustrip`:
 
-```julia
+```julia-repl
 julia> ustrip(u"km", 1000u"m")
 1.0
 
@@ -187,27 +187,27 @@ This is equivalent to `ustrip(quantity / unit)` but performs dimension checks fi
 There are a variety of physical constants accessible
 via the `Constants` submodule:
 
-```julia
+```julia-repl
 julia> Constants.c
 2.99792458e8 m s⁻¹
 ```
 
 which you may like to define as
 
-```julia
+```julia-repl
 julia> const C = Constants
 ```
 
 These can also be used inside the `u"..."` macro:
 
-```julia
+```julia-repl
 julia> u"Constants.c * Hz"
 2.99792458e8 m s⁻²
 ```
 
 Similarly, you can just import each individual constant:
 
-```julia
+```julia-repl
 julia> using DynamicQuantities.Constants: h
 ```
 
@@ -220,7 +220,7 @@ You can also choose to not eagerly convert to SI base units,
 instead leaving the units as the user had written them.
 For example:
 
-```julia
+```julia-repl
 julia> q = 100us"cm * kPa"
 100.0 cm kPa
 
@@ -231,14 +231,14 @@ julia> q^2
 You can convert to regular SI base units with
 `uexpand`:
 
-```julia
+```julia-repl
 julia> uexpand(q^2)
 1.0e6 kg² s⁻⁴
 ```
 
 This also works with constants:
 
-```julia
+```julia-repl
 julia> x = us"Constants.c * Hz"
 1.0 Hz c
 
@@ -250,7 +250,7 @@ julia> uexpand(x^2)
 ```
 
 You can also convert a quantity in regular base SI units to symbolic units with the `|>` infix operator
-```julia
+```julia-repl
 julia> 5e-9u"m" |> us"nm"
 5.0 nm
 ```
@@ -262,13 +262,13 @@ with `uconvert(us"nm", 5e-9u"m")`.)
 
 Finally, you can also import these directly:
 
-```julia
+```julia-repl
 julia> using DynamicQuantities.SymbolicUnits: cm
 ```
 
 or constants:
 
-```julia
+```julia-repl
 julia> using DynamicQuantities.SymbolicConstants: h
 ```
 
@@ -281,13 +281,13 @@ respectively.
 
 You can create custom units with the `@register_unit` macro:
 
-```julia
+```julia-repl
 julia> @register_unit OneFiveV 1.5u"V"
 ```
 
 and then use it in calculations normally:
 
-```julia
+```julia-repl
 julia> x = us"OneFiveV"
 1.0 OneFiveV
 
@@ -303,7 +303,7 @@ julia> 3us"V" |> us"OneFiveV"
 You can also use "*affine*" units such as Celsius or Fahrenheit,
 using the `ua"..."` string macro:
 
-```julia
+```julia-repl
 julia> room_temp = 22ua"degC"
 295.15 K
 
@@ -316,7 +316,7 @@ can use them in the same way as regular quantities, including taking differences
 
 To convert back, you can use the two-argument `ustrip` with the particular affine unit:
 
-```julia
+```julia-repl
 julia> ustrip(ua"degC", 295.15u"K")
 22.0
 ```
@@ -326,9 +326,9 @@ julia> ustrip(ua"degC", 295.15u"K")
 For working with an array of quantities that have the same dimensions,
 you can use a `QuantityArray`:
 
-```julia
-julia> ar = QuantityArray(rand(3), u"m/s")
-3-element QuantityArray(::Vector{Float64}, ::Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}):
+```julia-repl
+julia> ar = rand(3)u"m/s"
+3-element QuantityArray(::Vector{Float64}, ::Quantity{Float64, Dimensions{FRInt32}}):
  0.2729202669351497 m s⁻¹
  0.992546340360901 m s⁻¹
  0.16863543422972482 m s⁻¹
@@ -337,7 +337,7 @@ julia> ar = QuantityArray(rand(3), u"m/s")
 This `QuantityArray` is a subtype `<:AbstractArray{Quantity{Float64,Dimensions{...}},1}`,
 meaning that indexing a specific element will return a `Quantity`:
 
-```julia
+```julia-repl
 julia> ar[2]
 0.992546340360901 m s⁻¹
 
@@ -352,7 +352,7 @@ This also has a custom broadcasting interface which
 allows the compiler to avoid redundant dimension calculations,
 relative to if you had simply used an array of quantities:
 
-```julia
+```julia-repl
 julia> f(v) = v^2 * 1.5;
 
 julia> @btime $f.(xa) setup=(xa = randn(100000) .* u"km/s");
@@ -364,11 +364,21 @@ julia> @btime $f.(qa) setup=(xa = randn(100000) .* u"km/s"; qa = QuantityArray(x
 
 So we can see the `QuantityArray` version saves on both time and memory.
 
+By default, DynamicQuantities will create a `QuantityArray` from an `AbstractArray`, similarly to how a `Quantity` is created from a scalar in the [Usage](@ref) examples:
+
+```julia-repl
+julia> x = (1:3)us"km/h"
+3-element QuantityArray(::StepRangeLen{Float64, ...}, ::Quantity{Float64, SymbolicDimensions{...}}):
+ 1.0 km h⁻¹
+ 2.0 km h⁻¹
+ 3.0 km h⁻¹
+```
+
 ### Unitful
 
 DynamicQuantities allows you to convert back and forth from Unitful.jl:
 
-```julia
+```julia-repl
 julia> using Unitful: Unitful, @u_str; import DynamicQuantities
 
 julia> x = 0.5u"km/s"
@@ -397,7 +407,7 @@ for all known unit and constant symbols, using a sparse array.
 You can create custom spaces dimension spaces by simply creating
 a Julia struct subtyped to `AbstractDimensions`:
 
-```julia
+```julia-repl
 julia> struct CookiesAndMilk{R} <: AbstractDimensions{R}
            cookies::R
            milk::R
@@ -413,42 +423,43 @@ julia> total_cookies = cookie_rate * total_milk
 92.7 cookies
 ```
 
-Exponents are tracked by default with the type `R = FixedRational{Int32,C}`,
-which represents rational numbers with a fixed denominator `C`.
+Exponents are tracked by default with the type `FRInt32` (alias for `FixedRational{Int32, 25200}`),
+which represents rational numbers with an integer numerator and fixed denominator.
 This is much faster than `Rational`.
 
-```julia
+```julia-repl
 julia> typeof(0.5u"kg")
-Quantity{Float64, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float64, Dimensions{FRInt32}}
 ```
 
 You can change the type of the value field by initializing with a value
 explicitly of the desired type.
 
-```julia
+```julia-repl
 julia> typeof(Quantity(Float16(0.5), mass=1, length=1))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
 or by conversion:
 
-```julia
+```julia-repl
 julia> typeof(convert(Quantity{Float16}, 0.5u"m/s"))
-Quantity{Float16, Dimensions{FixedRational{Int32, 25200}}}
+Quantity{Float16, Dimensions{FRInt32}}
 ```
 
-For many applications, `FixedRational{Int8,6}` will suffice,
+For many applications, using `FRInt8` (alias for `FixedRational{Int8,12}`)
+will suffice as the base dimensions type,
 and can be faster as it means the entire `Dimensions`
 struct will fit into 64 bits.
 You can change the type of the dimensions field by passing
 the type you wish to use as the second argument to `Quantity`:
 
-```julia
+```julia-repl
 julia> using DynamicQuantities
 
-julia> R8 = Dimensions{FixedRational{Int8,6}};
+julia> R8 = Dimensions{FRInt8};
 
-julia> R32 = Dimensions{FixedRational{Int32,2^4 * 3^2 * 5^2 * 7}};  # Default
+julia> R32 = Dimensions{FRInt32};
 
 julia> q8 = [Quantity{Float64,R8}(randn(), length=rand(-2:2)) for i in 1:1000];
 
