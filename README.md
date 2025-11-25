@@ -3,7 +3,7 @@
 <img src="https://github.com/JuliaPhysics/DynamicQuantities.jl/assets/7593028/10b1e6b8-f1c5-43bc-97e6-4ddb4c175293" width=500>
 
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://symbolicml.org/DynamicQuantities.jl/dev/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaphysics.github.io/DynamicQuantities.jl/dev/)
 [![Build Status](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPhysics/DynamicQuantities.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/JuliaPhysics/DynamicQuantities.jl/branch/main/graph/badge.svg?token=TAos20cgRZ)](https://codecov.io/gh/JuliaPhysics/DynamicQuantities.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
