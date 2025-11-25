@@ -261,6 +261,41 @@ end
 ## Magnetic flux densities
 @_lazy_register_unit Gauss 1e-4 * T
 
+## Astro units
+@_lazy_register_unit erg 1e-7 * J
+@_lazy_register_unit dyn 1e-5 * N
+@_lazy_register_unit Jy 1e-26 * W / m^2 / Hz
+@_lazy_register_unit angstrom 1e-10 * m
+@_lazy_register_unit Å angstrom
+@_lazy_register_unit micron 1e-6 * m
+
+@add_prefixes erg ()
+@add_prefixes dyn ()
+@add_prefixes Jy (u, μ, m, M)
+@add_prefixes angstrom ()
+@add_prefixes micron ()
+
+@doc(
+     "Energy in ergs.",
+    erg,
+)
+@doc(
+     "Force in dynes.",
+    dyn,
+)
+@doc(
+     "Spectral flux density in janksys. Available variants: `uJy` (/`μJy`), `mJy`, `MJy`.",
+    Jy,
+)
+@doc(
+     "Length in angstroms.",
+    angstrom,
+)
+@doc(
+     "Length in angstroms. Also available is ASCII `angstrom`",
+    Å,
+)
+
 # Do not wish to define Gaussian units, as it changes
 # some formulas. Safer to force user to work exclusively in one unit system.
 
