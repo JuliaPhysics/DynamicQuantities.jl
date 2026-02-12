@@ -1,3 +1,5 @@
+import NestedNumbers
+
 @static if VERSION <= v"1.11.0-"
     @eval using Tricks: static_fieldnames
 else
@@ -40,7 +42,7 @@ to a base unit (e.g., `length` by default maps to `m`). You may also need to ove
 abstract type AbstractDimensions{R} end
 
 """
-    AbstractQuantity{T,D} <: Number
+    AbstractQuantity{T,D} <: NestedNumbers.QuantityNumber{T}
 
 An abstract type for quantities. `T` is the type of the value of the quantity,
 which should be `<:Number`.
@@ -59,7 +61,7 @@ specialize on `UnionAbstractQuantity` which is
 the union of both `AbstractQuantity` and `AbstractGenericQuantity`,
 _as well as any other future abstract quantity types_,
 """
-abstract type AbstractQuantity{T,D} <: Number end
+abstract type AbstractQuantity{T,D} <: NestedNumbers.QuantityNumber{T} end
 
 """
     AbstractGenericQuantity{T,D} <: Any
