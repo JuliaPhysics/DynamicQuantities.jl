@@ -6,6 +6,7 @@ import ..constructorof
 import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
+import ..UnionAbstractQuantity
 import ..Units: UNIT_SYMBOLS, UNIT_VALUES
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
@@ -41,6 +42,8 @@ function uparse(s::AbstractString)
     ex = :($as_quantity($ex))
     return eval(ex)::DEFAULT_QUANTITY_TYPE
 end
+uparse(unit::UnionAbstractQuantity, s::AbstractString) = parse(DEFAULT_VALUE_TYPE, s) * unit
+uparse(unit::UnionAbstractQuantity, x::Number) = x * unit
 
 as_quantity(q::DEFAULT_QUANTITY_TYPE) = q
 as_quantity(x::Number) = convert(DEFAULT_QUANTITY_TYPE, x)

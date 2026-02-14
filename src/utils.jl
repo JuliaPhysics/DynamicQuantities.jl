@@ -413,6 +413,7 @@ julia> ustrip.(u"km", [1000u"m", 2000u"m"])
     dimension(unit) == dimension(q) || throw(DimensionError(unit, q))
     return ustrip(q) / ustrip(unit)
 end
+@inline ustrip(::Type{T}, unit::UnionAbstractQuantity, q::UnionAbstractQuantity) where {T} = convert(T, ustrip(unit, q))
 
 """
     dimension(q::AbstractQuantity)
@@ -425,6 +426,38 @@ dimension(q::UnionAbstractQuantity) = q.dimensions
 dimension(d::AbstractDimensions) = d
 dimension(aq::AbstractArray{<:UnionAbstractQuantity}) = allequal(dimension.(aq)) ? dimension(first(aq)) : throw(DimensionError(aq[begin], aq[begin+1:end]))
 dimension(_) = DEFAULT_DIMENSIONLESS_TYPE()
+
+"""
+    dimensions(x)
+
+Alias for [`dimension`](@ref), for Unitful.jl compatibility.
+"""
+dimensions(x) = dimension(x)
+
+"""
+    isunitless(x)
+    isdimensionless(x)
+
+Return `true` if `x` has no dimensions.
+"""
+isunitless(x) = iszero(dimension(x))
+isdimensionless(x) = isunitless(x)
+
+"""
+    unit(q)
+
+Return the multiplicative unit quantity associated with `q`.
+"""
+unit(q::Q) where {Q<:UnionAbstractQuantity} = oneunit(q)
+unit(::Number) = one(DEFAULT_QUANTITY_TYPE)
+unit(::Type{<:Number}) = one(DEFAULT_QUANTITY_TYPE)
+
+"""
+    upreferred(x)
+
+Compatibility no-op for Unitful.jl-like APIs.
+"""
+upreferred(x) = x
 
 """
     ulength(q::AbstractQuantity)

@@ -1,3 +1,5 @@
+using DispatchDoctor: @unstable
+
 @static if VERSION <= v"1.11.0-"
     @eval using Tricks: static_fieldnames
 else
@@ -153,6 +155,8 @@ end
 Base.getproperty(::NoDims{R}, ::Symbol) where {R} = zero(R)
 
 const DEFAULT_DIMENSIONLESS_TYPE = NoDims{DEFAULT_DIM_BASE_TYPE}
+const dimensionless = DEFAULT_DIMENSIONLESS_TYPE()
+const NoUnits = dimensionless
 
 """
     Quantity{T<:Number,D<:AbstractDimensions} <: AbstractQuantity{T,D} <: Number
@@ -294,13 +298,13 @@ function with_type_parameters(::Type{<:RealQuantity}, ::Type{T}, ::Type{D}) wher
 end
 
 # The following functions should be overloaded for special types
-function constructorof(::Type{T}) where {T<:Union{UnionAbstractQuantity,AbstractDimensions}}
+@unstable function constructorof(::Type{T}) where {T<:Union{UnionAbstractQuantity,AbstractDimensions}}
     return Base.typename(T).wrapper
 end
-function with_type_parameters(::Type{D}, ::Type{R}) where {D<:AbstractDimensions,R}
+@unstable function with_type_parameters(::Type{D}, ::Type{R}) where {D<:AbstractDimensions,R}
     return constructorof(D){R}
 end
-function with_type_parameters(::Type{Q}, ::Type{T}, ::Type{D}) where {Q<:UnionAbstractQuantity,T,D}
+@unstable function with_type_parameters(::Type{Q}, ::Type{T}, ::Type{D}) where {Q<:UnionAbstractQuantity,T,D}
     return constructorof(Q){T,D}
 end
 

@@ -6,6 +6,13 @@ with quantities are `ustrip` and `dimension`:
 ```@docs
 ustrip
 dimension
+dimensions
+unit
+isunitless
+isdimensionless
+upreferred
+NoUnits
+dimensionless
 ```
 
 ## Accessing dimensions

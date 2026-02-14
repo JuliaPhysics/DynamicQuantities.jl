@@ -4,11 +4,11 @@ export Units, Constants, SymbolicUnits, SymbolicConstants
 export AbstractQuantity, AbstractGenericQuantity, AbstractRealQuantity, UnionAbstractQuantity
 export Quantity, GenericQuantity, RealQuantity
 export FixedRational, FRInt32, FRInt8
-export AbstractDimensions, Dimensions, NoDims
+export AbstractDimensions, Dimensions, NoDims, NoUnits, dimensionless
 export AbstractSymbolicDimensions, SymbolicDimensions, SymbolicDimensionsSingleton
 export QuantityArray
 export DimensionError
-export ustrip, dimension, uexpand, uconvert, ustripexpand
+export ustrip, dimension, dimensions, unit, isunitless, isdimensionless, upreferred, uexpand, uconvert, ustripexpand
 export ulength, umass, utime, ucurrent, utemperature, uluminosity, uamount
 export uparse, @u_str, sym_uparse, @us_str, @register_unit, aff_uparse, @ua_str
 
