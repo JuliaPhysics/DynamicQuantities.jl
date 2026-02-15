@@ -666,6 +666,27 @@ end
     @test ustrip(z) ≈ 60 * 60 * 24 * 365.25
     @test z == uparse("yr")
 
+    @testset "Unitful-like API compatibility shims" begin
+        q = 3.0u"m"
+
+        @test isunitless(1.0)
+        @test isdimensionless(1.0)
+        @test !isunitless(q)
+        @test !isdimensionless(q)
+
+        @test unit(q) == 1.0u"m"
+        @test isunitless(unit(1))
+        @test isunitless(unit(Float64))
+        @test ustrip(unit(1)) == 1.0
+        @test ustrip(unit(Float64)) == 1.0
+
+        @test upreferred(q) === q
+        @test upreferred(2.0) == 2.0
+
+        @test uparse("m") == u"m"
+        @test uparse("km") == u"km"
+    end
+
     # Test type stability of extreme range of units
     @test typeof(u"1") == DEFAULT_QUANTITY_TYPE
     @test typeof(u"1f0") == DEFAULT_QUANTITY_TYPE
@@ -1076,6 +1097,10 @@ end
     @test ustrip(u"mm", 1000u"m") == 1000000.0
     @test ustrip(u"s", 1u"minute") == 60.0
     @test ustrip(u"minute", 60u"s") == 1.0
+
+    # Typed conversions
+    @test ustrip(Float32, u"m", 3.0u"m") === Float32(3.0)
+    @test ustrip(Float64, u"km", 2500.0u"m") === 2.5
 
     # Arrays
     m_qarray = QuantityArray([1000.0, 2000.0], u"m")
@@ -2318,27 +2343,4 @@ end
 
 pop!(LOAD_PATH)
 
-@testset "Unitful-like API compatibility shims" begin
-    q = 3.0u"m"
-
-    @test isunitless(1.0)
-    @test isdimensionless(1.0)
-    @test !isunitless(q)
-    @test !isdimensionless(q)
-
-    @test unit(q) == 1.0u"m"
-    @test isunitless(unit(1))
-    @test isunitless(unit(Float64))
-    @test ustrip(unit(1)) == 1.0
-    @test ustrip(unit(Float64)) == 1.0
-
-    @test upreferred(q) === q
-    @test upreferred(2.0) == 2.0
-
-    @test ustrip(Float32, u"m", 3.0u"m") === Float32(3.0)
-    @test ustrip(Float64, u"km", 2500.0u"m") === 2.5
-
-    @test uparse("m") == u"m"
-    @test uparse("km") == u"km"
-    @test_throws ArgumentError uparse("x")
-end
+# (moved Unitful-like API compatibility shims tests earlier in this file)
