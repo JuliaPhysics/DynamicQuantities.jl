@@ -42,8 +42,6 @@ function uparse(s::AbstractString)
     ex = :($as_quantity($ex))
     return eval(ex)::DEFAULT_QUANTITY_TYPE
 end
-# Note: Unitful's `uparse` parses unit strings (e.g. `uparse("km")`).
-# We intentionally do not provide `uparse(unit, x/s)` overloads here.
 
 as_quantity(q::DEFAULT_QUANTITY_TYPE) = q
 as_quantity(x::Number) = convert(DEFAULT_QUANTITY_TYPE, x)
