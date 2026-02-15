@@ -448,9 +448,7 @@ isdimensionless(x) = isunitless(x)
 
 Return the multiplicative unit quantity associated with `q`.
 """
-unit(q::Q) where {Q<:UnionAbstractQuantity} = oneunit(q)
-unit(::Number) = one(DEFAULT_QUANTITY_TYPE)
-unit(::Type{<:Number}) = one(DEFAULT_QUANTITY_TYPE)
+unit(t::T) where {T} = oneunit(t)
 
 """
     upreferred(x)
