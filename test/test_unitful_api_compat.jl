@@ -3,9 +3,7 @@ using Test
 
 q = 3.0u"m"
 
-@test DynamicQuantities.dimensions(q) == DynamicQuantities.dimension(q)
-@test DynamicQuantities.dimensions(5) == DynamicQuantities.dimensionless
-
+# (no `dimensions` alias; keep only `dimension`)
 @test DynamicQuantities.isunitless(1.0)
 @test DynamicQuantities.isdimensionless(1.0)
 @test !DynamicQuantities.isunitless(q)

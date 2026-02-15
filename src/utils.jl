@@ -427,12 +427,8 @@ dimension(d::AbstractDimensions) = d
 dimension(aq::AbstractArray{<:UnionAbstractQuantity}) = allequal(dimension.(aq)) ? dimension(first(aq)) : throw(DimensionError(aq[begin], aq[begin+1:end]))
 dimension(_) = DEFAULT_DIMENSIONLESS_TYPE()
 
-"""
-    dimensions(x)
-
-Alias for [`dimension`](@ref), for Unitful.jl compatibility.
-"""
-dimensions(x) = dimension(x)
+# Note: we intentionally do not define `dimensions(x)` (plural).
+# Use `dimension(x)` (Unitful.jl-compatible API).
 
 """
     isunitless(x)
