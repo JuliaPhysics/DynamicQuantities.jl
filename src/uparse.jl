@@ -6,7 +6,6 @@ import ..constructorof
 import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
-import ..UnionAbstractQuantity
 import ..Units: UNIT_SYMBOLS, UNIT_VALUES
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
