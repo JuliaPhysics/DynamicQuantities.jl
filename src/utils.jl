@@ -432,10 +432,15 @@ dimension(_) = DEFAULT_DIMENSIONLESS_TYPE()
 
 Return `true` if `x` has no dimensions.
 
-See also [`isdimensionless`](@ref) (alias).
+See also [`isdimensionless`](@ref).
 """
 isunitless(x) = iszero(dimension(x))
-@doc (@doc isunitless) isdimensionless
+
+"""
+    isdimensionless(x)
+
+Alias for [`isunitless`](@ref).
+"""
 isdimensionless(x) = isunitless(x)
 
 """
