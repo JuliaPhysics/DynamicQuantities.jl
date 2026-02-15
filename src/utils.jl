@@ -436,11 +436,13 @@ dimensions(x) = dimension(x)
 
 """
     isunitless(x)
-    isdimensionless(x)
 
 Return `true` if `x` has no dimensions.
+
+See also [`isdimensionless`](@ref) (alias).
 """
 isunitless(x) = iszero(dimension(x))
+@doc (@doc isunitless) isdimensionless
 isdimensionless(x) = isunitless(x)
 
 """

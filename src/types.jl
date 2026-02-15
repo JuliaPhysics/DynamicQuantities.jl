@@ -155,7 +155,21 @@ end
 Base.getproperty(::NoDims{R}, ::Symbol) where {R} = zero(R)
 
 const DEFAULT_DIMENSIONLESS_TYPE = NoDims{DEFAULT_DIM_BASE_TYPE}
+
+"""
+    dimensionless
+
+A dimensionless (unitless) quantity.
+
+This is the default value returned by `dimension(::Number)`.
+"""
 const dimensionless = DEFAULT_DIMENSIONLESS_TYPE()
+
+"""
+    NoUnits
+
+Alias of [`dimensionless`](@ref), provided for Unitful.jl compatibility.
+"""
 const NoUnits = dimensionless
 
 """

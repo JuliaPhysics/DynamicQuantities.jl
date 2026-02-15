@@ -32,7 +32,7 @@ uamount
 ```@autodocs
 Modules = [DynamicQuantities]
 Pages   = ["utils.jl"]
-Filter  = t -> !(t in [ustrip, dimension, ulength, umass, utime, ucurrent, utemperature, uluminosity, uamount])
+Filter  = t -> !(t in [ustrip, dimension, dimensions, unit, isunitless, isdimensionless, upreferred, ulength, umass, utime, ucurrent, utemperature, uluminosity, uamount])
 ```
 
 ## Internals
