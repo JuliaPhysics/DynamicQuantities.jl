@@ -18,7 +18,6 @@ end
         include("test_unitful.jl")
     end
 end
-# Unitful-like API compatibility shims are tested in unittests.jl
 @testitem "ScientificTypes.jl integration tests" begin
     include("test_scitypes.jl")
 end
