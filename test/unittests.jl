@@ -2342,5 +2342,3 @@ using ExternalUnitRegistration: MyWb
 end
 
 pop!(LOAD_PATH)
-
-# (moved Unitful-like API compatibility shims tests earlier in this file)
