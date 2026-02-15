@@ -4,7 +4,7 @@ export Units, Constants, SymbolicUnits, SymbolicConstants
 export AbstractQuantity, AbstractGenericQuantity, AbstractRealQuantity, UnionAbstractQuantity
 export Quantity, GenericQuantity, RealQuantity
 export FixedRational, FRInt32, FRInt8
-export AbstractDimensions, Dimensions, NoDims, NoUnits, dimensionless
+export AbstractDimensions, Dimensions, NoDims
 export AbstractSymbolicDimensions, SymbolicDimensions, SymbolicDimensionsSingleton
 export QuantityArray
 export DimensionError

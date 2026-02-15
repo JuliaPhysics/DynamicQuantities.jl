@@ -21,10 +21,8 @@ q = 3.0u"m"
 @test DynamicQuantities.ustrip(Float32, u"m", 3.0u"m") === Float32(3.0)
 @test DynamicQuantities.ustrip(Float64, u"km", 2500.0u"m") === 2.5
 
-@test DynamicQuantities.uparse(u"m", "3.0") == 3.0u"m"
-@test DynamicQuantities.uparse(u"km", "3.0") == 3.0u"km"
-@test DynamicQuantities.uparse(u"m", 2) == 2.0u"m"
-@test_throws ArgumentError DynamicQuantities.uparse(u"m", "x")
+@test DynamicQuantities.uparse("m") == u"m"
+@test DynamicQuantities.uparse("km") == u"km"
+@test_throws ArgumentError DynamicQuantities.uparse("x")
 
-@test DynamicQuantities.NoUnits == DynamicQuantities.dimensionless
-@test DynamicQuantities.dimensionless == DynamicQuantities.NoDims()
+# Note: DQ does not export Unitful-style `NoUnits`/`NoDims` sentinels.

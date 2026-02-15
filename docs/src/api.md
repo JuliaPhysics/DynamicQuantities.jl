@@ -10,8 +10,6 @@ unit
 isunitless
 isdimensionless
 upreferred
-NoUnits
-dimensionless
 ```
 
 ## Accessing dimensions
