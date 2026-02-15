@@ -2317,3 +2317,28 @@ using ExternalUnitRegistration: MyWb
 end
 
 pop!(LOAD_PATH)
+
+@testset "Unitful-like API compatibility shims" begin
+    q = 3.0u"m"
+
+    @test isunitless(1.0)
+    @test isdimensionless(1.0)
+    @test !isunitless(q)
+    @test !isdimensionless(q)
+
+    @test unit(q) == 1.0u"m"
+    @test isunitless(unit(1))
+    @test isunitless(unit(Float64))
+    @test ustrip(unit(1)) == 1.0
+    @test ustrip(unit(Float64)) == 1.0
+
+    @test upreferred(q) === q
+    @test upreferred(2.0) == 2.0
+
+    @test ustrip(Float32, u"m", 3.0u"m") === Float32(3.0)
+    @test ustrip(Float64, u"km", 2500.0u"m") === 2.5
+
+    @test uparse("m") == u"m"
+    @test uparse("km") == u"km"
+    @test_throws ArgumentError uparse("x")
+end
