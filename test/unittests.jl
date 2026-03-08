@@ -255,6 +255,21 @@ end
     @test_throws DimensionError complex(1.0, 0.5u"m")
 end
 
+@testset "real(::Type{<:UnionAbstractQuantity})" begin
+    # Base.real(::Type{T}) for scalar types can fallback to `zero(T)` for non-Real types.
+    # For runtime-unit quantities, `zero(::Type{<:Quantity})` is intentionally undefined,
+    # so we define explicit methods and verify they are exercised here.
+
+    for D in (DEFAULT_DIM_TYPE, Dimensions{Rational{Int32}})
+        @test real(Quantity{ComplexF64,D}) === Quantity{Float64,D}
+        @test real(GenericQuantity{ComplexF64,D}) === GenericQuantity{Float64,D}
+
+        # Idempotence on already-real value types
+        @test real(Quantity{Float64,D}) === Quantity{Float64,D}
+        @test real(GenericQuantity{Float64,D}) === GenericQuantity{Float64,D}
+    end
+end
+
 @testset "Fallbacks" begin
     @test ustrip(0.5) == 0.5
     @test ustrip(ones(32)) == ones(32)
