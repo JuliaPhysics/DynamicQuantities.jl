@@ -674,11 +674,12 @@ end
         @test !isunitless(q)
         @test !isdimensionless(q)
 
-        # `isunitless`/`isdimensionless` should be a pure predicate, even for arrays
-        @test isunitless([1.0u"1", 2.0u"1"])
-        @test !isunitless([1.0u"m", 2.0u"m"])
-        @test !isunitless([1.0u"m", 2.0u"s"])
-        @test !isdimensionless([1.0u"m", 2.0u"s"])
+        # Match Unitful.jl: `isunitless`/`isdimensionless` are scalar predicates.
+        # For arrays, use broadcasting: `isunitless.(x)`.
+        @test_throws MethodError isunitless([1.0u"1", 2.0u"1"])
+        @test_throws MethodError isunitless([1.0u"m", 2.0u"m"])
+        @test_throws MethodError isunitless([1.0u"m", 2.0u"s"])
+        @test_throws MethodError isdimensionless([1.0u"m", 2.0u"s"])
 
         @test unit(q) == 1.0u"m"
         @test isunitless(unit(1))

@@ -432,13 +432,15 @@ dimension(_) = DEFAULT_DIMENSIONLESS_TYPE()
 
 Return `true` if `x` has no dimensions.
 
+!!! note
+    Like Unitful.jl, `isunitless` is only defined for scalars. For arrays, use broadcasting:
+    `isunitless.(x)`.
+
 See also [`isdimensionless`](@ref).
 """
-isunitless(x) = iszero(dimension(x))
-# Avoid calling `dimension` on arrays of quantities, since `dimension(aq)` may throw
-# for mixed-dimension arrays. For predicates like `isunitless`, return `false` rather
-# than erroring.
-isunitless(aq::AbstractArray{<:UnionAbstractQuantity}) = all(isunitless, aq)
+isunitless(x::Number) = iszero(dimension(x))
+isunitless(x::AbstractGenericQuantity) = iszero(dimension(x))
+isunitless(d::AbstractDimensions) = iszero(d)
 
 """
     isdimensionless(x)
