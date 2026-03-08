@@ -255,6 +255,21 @@ end
     @test_throws DimensionError complex(1.0, 0.5u"m")
 end
 
+@testset "real(::Type{<:UnionAbstractQuantity})" begin
+    # Base.real(::Type{T}) for scalar types can fallback to `zero(T)` for non-Real types.
+    # For runtime-unit quantities, `zero(::Type{<:Quantity})` is intentionally undefined,
+    # so we define explicit methods and verify they are exercised here.
+
+    for D in (DEFAULT_DIM_TYPE, Dimensions{Rational{Int32}})
+        @test real(Quantity{ComplexF64,D}) === Quantity{Float64,D}
+        @test real(GenericQuantity{ComplexF64,D}) === GenericQuantity{Float64,D}
+
+        # Idempotence on already-real value types
+        @test real(Quantity{Float64,D}) === Quantity{Float64,D}
+        @test real(GenericQuantity{Float64,D}) === GenericQuantity{Float64,D}
+    end
+end
+
 @testset "Fallbacks" begin
     @test ustrip(0.5) == 0.5
     @test ustrip(ones(32)) == ones(32)
@@ -545,6 +560,15 @@ end
 
     @test zero(x) == Quantity(0, length=1)
     @test typeof(zero(x)) == Quantity{Int64,DEFAULT_DIM_TYPE}
+
+    @testset "zero(::Vector{<:Quantity}) preserves per-entry units" begin
+        x = [1.0u"m", 2.0u"s"]
+
+        z0 = zero(x)
+        @test z0[1] == 0.0u"m"
+        @test z0[2] == 0.0u"s"
+        @test x .+ z0 == x
+    end
 
     # Invalid calls:
     @test_throws ErrorException zero(Quantity)
@@ -2317,3 +2341,4 @@ using ExternalUnitRegistration: MyWb
 end
 
 pop!(LOAD_PATH)
+

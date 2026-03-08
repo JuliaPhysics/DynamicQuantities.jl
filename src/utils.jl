@@ -313,6 +313,12 @@ Base.one(::D) where {D<:AbstractDimensions} = one(D)
 
 # Additive identities (zero). We have to invalidate these due to different behavior with conversion
 Base.zero(q::Q) where {Q<:UnionAbstractQuantity} = new_quantity(Q, zero(ustrip(q)), dimension(q))
+
+# `zero(eltype(x))` is undefined for runtime-unit quantities.
+for (Qabs, _, _) in ABSTRACT_QUANTITY_TYPES
+    @eval Base.zero(x::Array{<:$Qabs}) = map(zero, x)
+end
+
 Base.zero(::AbstractDimensions) = error("There is no such thing as an additive identity for a `AbstractDimensions` object, as + is only defined for `UnionAbstractQuantity`.")
 Base.zero(::Type{T}) where {T<:UnionAbstractQuantity} = error("Cannot create an additive identity from `Type{<:$(Base.typename(T).wrapper)}`, as the dimensions are unknown. Please use `zero(::$(Base.typename(T).wrapper))` instead.")
 Base.zero(::Type{D}) where {D<:AbstractDimensions} = error("There is no such thing as an additive identity for `$(Base.typename(D).wrapper)`, as + is only defined for quantities.")
@@ -324,6 +330,13 @@ Base.oneunit(::Type{T}) where {T<:UnionAbstractQuantity} = error("Cannot create 
 Base.oneunit(::Type{D}) where {D<:AbstractDimensions} = error("There is no such thing as a dimensionful 1 for a `$(Base.typename(D).wrapper)` type, as + is only defined for quantities.")
 
 Base.float(::Type{Q}) where {T,D,Q<:UnionAbstractQuantity{T,D}} = with_type_parameters(Q, Base.float(T), D)
+
+# Base.real(::Type{T}) for scalar types can fallback to `zero(T)` for non-Real types.
+# For runtime-unit quantities, `zero(::Type{<:Quantity})` is intentionally undefined,
+# so Base's fallback would error. Match Unitful semantics by mapping through the
+# stored value type instead.
+Base.real(::Type{Q}) where {T<:Number,D,Q<:AbstractQuantity{T,D}} = with_type_parameters(Q, real(T), D)
+Base.real(::Type{Q}) where {T<:Number,D,Q<:AbstractGenericQuantity{T,D}} = with_type_parameters(Q, real(T), D)
 
 Base.show(io::IO, d::AbstractDimensions) =
     let tmp_io = IOBuffer()

@@ -24,6 +24,9 @@ end
 @testitem "Measurements.jl integration tests" begin
     include("test_measurements.jl")
 end
+@testitem "SciMLBase/RecursiveArrayTools integration tests" begin
+    include("test_sciml.jl")
+end
 ## Broken; see https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/118
 # @testitem "Meshes.jl integration tests" begin
 #     include("test_meshes.jl")
