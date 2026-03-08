@@ -2317,3 +2317,12 @@ using ExternalUnitRegistration: MyWb
 end
 
 pop!(LOAD_PATH)
+
+@testset "zero(::Vector{<:Quantity}) preserves per-entry units" begin
+    x = [1.0u"m", 2.0u"s"]
+
+    z = zero(x)
+    @test z[1] == 0.0u"m"
+    @test z[2] == 0.0u"s"
+    @test x .+ z == x
+end
