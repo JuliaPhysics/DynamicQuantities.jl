@@ -435,6 +435,10 @@ Return `true` if `x` has no dimensions.
 See also [`isdimensionless`](@ref).
 """
 isunitless(x) = iszero(dimension(x))
+# Avoid calling `dimension` on arrays of quantities, since `dimension(aq)` may throw
+# for mixed-dimension arrays. For predicates like `isunitless`, return `false` rather
+# than erroring.
+isunitless(aq::AbstractArray{<:UnionAbstractQuantity}) = all(isunitless, aq)
 
 """
     isdimensionless(x)
