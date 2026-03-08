@@ -546,6 +546,15 @@ end
     @test zero(x) == Quantity(0, length=1)
     @test typeof(zero(x)) == Quantity{Int64,DEFAULT_DIM_TYPE}
 
+    @testset "zero(::Vector{<:Quantity}) preserves per-entry units" begin
+        x = [1.0u"m", 2.0u"s"]
+
+        z0 = zero(x)
+        @test z0[1] == 0.0u"m"
+        @test z0[2] == 0.0u"s"
+        @test x .+ z0 == x
+    end
+
     # Invalid calls:
     @test_throws ErrorException zero(Quantity)
     @test_throws ErrorException zero(Dimensions())
@@ -2318,11 +2327,3 @@ end
 
 pop!(LOAD_PATH)
 
-@testset "zero(::Vector{<:Quantity}) preserves per-entry units" begin
-    x = [1.0u"m", 2.0u"s"]
-
-    z = zero(x)
-    @test z[1] == 0.0u"m"
-    @test z[2] == 0.0u"s"
-    @test x .+ z == x
-end
