@@ -1,3 +1,5 @@
+using DispatchDoctor: @unstable
+
 @static if VERSION <= v"1.11.0-"
     @eval using Tricks: static_fieldnames
 else
@@ -157,6 +159,22 @@ Base.getproperty(::NoDims{R}, ::Symbol) where {R} = zero(R)
 const DEFAULT_DIMENSIONLESS_TYPE = NoDims{DEFAULT_DIM_BASE_TYPE}
 
 """
+    dimensionless
+
+A dimensionless (unitless) quantity.
+
+This is the default value returned by `dimension(::Number)`.
+"""
+const dimensionless = DEFAULT_DIMENSIONLESS_TYPE()
+
+"""
+    NoUnits
+
+Alias of [`dimensionless`](@ref), provided for Unitful.jl compatibility.
+"""
+const NoUnits = dimensionless
+
+"""
     Quantity{T<:Number,D<:AbstractDimensions} <: AbstractQuantity{T,D} <: Number
 
 Physical quantity with value `value` of type `T` and dimensions `dimensions` of type `D`.
@@ -299,10 +317,10 @@ end
 @unstable function constructorof(::Type{T}) where {T<:Union{UnionAbstractQuantity,AbstractDimensions}}
     return Base.typename(T).wrapper
 end
-function with_type_parameters(::Type{D}, ::Type{R}) where {D<:AbstractDimensions,R}
+@unstable function with_type_parameters(::Type{D}, ::Type{R}) where {D<:AbstractDimensions,R}
     return constructorof(D){R}
 end
-function with_type_parameters(::Type{Q}, ::Type{T}, ::Type{D}) where {Q<:UnionAbstractQuantity,T,D}
+@unstable function with_type_parameters(::Type{Q}, ::Type{T}, ::Type{D}) where {Q<:UnionAbstractQuantity,T,D}
     return constructorof(Q){T,D}
 end
 

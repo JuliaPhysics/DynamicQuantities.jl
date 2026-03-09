@@ -446,7 +446,7 @@ module SymbolicUnits
 
     const SYMBOLIC_UNIT_VALUES = WriteOnceReadMany{Vector{DEFAULT_SYMBOLIC_QUANTITY_TYPE}}()
 
-    function update_symbolic_unit_values!(unit, symbolic_unit_values = SYMBOLIC_UNIT_VALUES)
+    @unstable function update_symbolic_unit_values!(unit, symbolic_unit_values = SYMBOLIC_UNIT_VALUES)
         @eval begin
             const $unit = constructorof(DEFAULT_SYMBOLIC_QUANTITY_TYPE)(
                 DEFAULT_VALUE_TYPE(1.0),
@@ -456,7 +456,7 @@ module SymbolicUnits
         end
     end
 
-    update_symbolic_unit_values!(w::WriteOnceReadMany) = update_symbolic_unit_values!.(w._raw_data)
+    @unstable update_symbolic_unit_values!(w::WriteOnceReadMany) = update_symbolic_unit_values!.(w._raw_data)
     update_symbolic_unit_values!(UNIT_SYMBOLS)
 
     # Non-eval version of `update_symbolic_unit_values!` for registering units in
