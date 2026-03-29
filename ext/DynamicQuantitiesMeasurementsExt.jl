@@ -1,6 +1,6 @@
 module DynamicQuantitiesMeasurementsExt
 
-using DynamicQuantities: UnionAbstractQuantity, new_quantity, dimension, ustrip, DimensionError, ABSTRACT_QUANTITY_TYPES
+using DynamicQuantities: UnionAbstractQuantity, AbstractQuantity, AbstractGenericQuantity, AbstractRealQuantity, new_quantity, dimension, ustrip, DimensionError
 using Measurements: Measurements, Measurement, measurement, value, uncertainty
 import Base.FastMath: div_fast
 
@@ -16,7 +16,7 @@ end
 Measurements.value(q::Q) where {Q <: UnionAbstractQuantity} = new_quantity(Q, value(ustrip(q)), dimension(q))
 Measurements.uncertainty(q::Q) where {Q <: UnionAbstractQuantity} = new_quantity(Q, uncertainty(ustrip(q)), dimension(q))
 
-for (Q, _, _) in ABSTRACT_QUANTITY_TYPES
+for Q in (AbstractQuantity, AbstractGenericQuantity, AbstractRealQuantity)
     @eval begin
         Base.:/(a::$Q, b::Measurement) = new_quantity(typeof(a), ustrip(a) / b, dimension(a))
         Base.:/(a::Measurement, b::$Q) = new_quantity(typeof(b), a / ustrip(b), inv(dimension(b)))
