@@ -18,6 +18,6 @@ for Q in (RealQuantity, Quantity, GenericQuantity)
     end
 
     a = Q(1.0u"m/s")
-    @test a / measurement(2.0, 0.1) == Base.FastMath.div_fast(a, measurement(2.0, 0.1))
-    @test measurement(2.0, 0.1) / a == Base.FastMath.div_fast(measurement(2.0, 0.1), a)
+    @test (@fastmath a / measurement(2.0, 0.1)) == a / measurement(2.0, 0.1)
+    @test (@fastmath measurement(2.0, 0.1) / a) == measurement(2.0, 0.1) / a
 end
