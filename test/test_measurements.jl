@@ -16,4 +16,8 @@ for Q in (RealQuantity, Quantity, GenericQuantity)
         y = Q{Float16}(0.1u"m/s") ± Q{Float32}(0.1u"m/s")
         @test typeof(y) <: Q{Measurement{Float32}}
     end
+
+    a = Q(1.0u"m/s")
+    @test a / measurement(2.0, 0.1) == Base.FastMath.div_fast(a, measurement(2.0, 0.1))
+    @test measurement(2.0, 0.1) / a == Base.FastMath.div_fast(measurement(2.0, 0.1), a)
 end
