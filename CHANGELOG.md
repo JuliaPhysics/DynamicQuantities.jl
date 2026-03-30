@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.0...v1.12.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* disambiguate measurement fast division ([#207](https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/207)) ([f4251ac](https://github.com/JuliaPhysics/DynamicQuantities.jl/commit/f4251aca018343713719d9bceaa93ff17db57ff8))
+
 ## [1.12.0](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.11.0...v1.12.0) (2026-03-08)
 
 
