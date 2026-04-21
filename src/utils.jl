@@ -386,6 +386,8 @@ Base.convert(::Type{D}, d::AbstractDimensions) where {R,D<:AbstractDimensions{R}
 
 Base.copy(d::D) where {D<:AbstractDimensions} = map_dimensions(copy, d)
 Base.copy(q::Q) where {Q<:UnionAbstractQuantity} = new_quantity(Q, copy(ustrip(q)), copy(dimension(q)))
+# Hash all quantity wrappers under the same tag, because `==` deliberately ignores whether
+# an equal quantity is stored as `Quantity`, `RealQuantity`, `GenericQuantity`, etc.
 Base.hash(q::UnionAbstractQuantity, h::UInt) = hash(dimension(q), hash(ustrip(q), hash(UnionAbstractQuantity, h)))
 
 """

@@ -926,6 +926,8 @@ end
     q = 1.5us"km/s"
     @test q == 1.5 * us"km" / us"s"
     @test typeof(q) <: with_type_parameters(DEFAULT_QUANTITY_TYPE, Float64, SymbolicDimensions{DEFAULT_DIM_BASE_TYPE})
+    @test Quantity(1.0, length=1) == RealQuantity(1.0, length=1) == GenericQuantity(1.0, length=1)
+    @test hash(Quantity(1.0, length=1)) == hash(RealQuantity(1.0, length=1)) == hash(GenericQuantity(1.0, length=1))
     @test hash(us"m/s") == hash(us"m/s")
     @test length(unique(fill(us"m/s", 10))) == 1
     @register_unit gacc 9.81u"m/s^2"
