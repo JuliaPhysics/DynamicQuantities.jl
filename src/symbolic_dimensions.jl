@@ -270,11 +270,18 @@ Base.copy(d::SymbolicDimensions) = SymbolicDimensions(copy(nzdims(d)), copy(nzva
 Base.copy(d::SymbolicDimensionsSingleton) = constructorof(typeof(d))(getfield(d, :dim))
 
 function Base.hash(d::AbstractSymbolicDimensions, h::UInt)
-    h = hash(AbstractSymbolicDimensions, h)
-    for (dim, val) in zip(nzdims(d), nzvals(d))
-        iszero(val) && continue
-        h = hash(dim, h)
-        h = hash(val, h)
+    h = hash(constructorof(typeof(d)), h)
+    dims = nzdims(d)
+    vals = nzvals(d)
+    n = length(dims)
+    i = 1
+    while i <= n
+        val = vals[i]
+        if !iszero(val)
+            h = hash(dims[i], h)
+            h = hash(Rational(val), h)
+        end
+        i += 1
     end
     return h
 end
