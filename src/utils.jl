@@ -386,6 +386,7 @@ Base.convert(::Type{D}, d::AbstractDimensions) where {R,D<:AbstractDimensions{R}
 
 Base.copy(d::D) where {D<:AbstractDimensions} = map_dimensions(copy, d)
 Base.copy(q::Q) where {Q<:UnionAbstractQuantity} = new_quantity(Q, copy(ustrip(q)), copy(dimension(q)))
+Base.hash(q::UnionAbstractQuantity, h::UInt) = hash(dimension(q), hash(ustrip(q), hash(UnionAbstractQuantity, h)))
 
 """
     ustrip(q::AbstractQuantity)
