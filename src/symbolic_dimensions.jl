@@ -279,9 +279,7 @@ function Base.hash(d::AbstractSymbolicDimensions, h::UInt)
         val = vals[i]
         if !iszero(val)
             h = hash(dims[i], h)
-            # Hash equal exponents structurally, independent of whether they are
-            # stored as `Rational`, `FixedRational`, etc.
-            h = hash(Rational(val), h)
+            h = hash(val, h)
         end
         i += 1
     end

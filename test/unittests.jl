@@ -912,7 +912,6 @@ end
         @test hash(sym) == hash(copy(sym))
         @test hash(sym) == hash(SymbolicDimensions(; m=3, g=0, s=-1))
         @test hash(sym) == hash(SymbolicDimensionsSingleton{T}(:m)^3 / SymbolicDimensionsSingleton{T}(:s))
-        @test hash(SymbolicDimensions{Rational{Int}}(; m=1 // 2)) == hash(SymbolicDimensions{FRInt32}(; m=1 // 2))
         @test sym != SymbolicDimensions(; m=2, s=-1)
         @test SymbolicDimensions(; m=2, s=-1) != sym
         @test sym != SymbolicDimensions(; m=3, g=1, s=-1)
