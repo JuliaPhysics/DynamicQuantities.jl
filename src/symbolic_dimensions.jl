@@ -269,6 +269,23 @@ ustripexpand(q::QuantityArray) = ustrip(uexpand(q))
 Base.copy(d::SymbolicDimensions) = SymbolicDimensions(copy(nzdims(d)), copy(nzvals(d)))
 Base.copy(d::SymbolicDimensionsSingleton) = constructorof(typeof(d))(getfield(d, :dim))
 
+function Base.hash(d::AbstractSymbolicDimensions, h::UInt)
+    h = hash(constructorof(typeof(d)), h)
+    dims = nzdims(d)
+    vals = nzvals(d)
+    n = length(dims)
+    i = 1
+    while i <= n
+        val = vals[i]
+        if !iszero(val)
+            h = hash(dims[i], h)
+            h = hash(val, h)
+        end
+        i += 1
+    end
+    return h
+end
+
 function Base.:(==)(l::AbstractSymbolicDimensions, r::AbstractSymbolicDimensions)
     nzdims_l = nzdims(l)
     nzvals_l = nzvals(l)
