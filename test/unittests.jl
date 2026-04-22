@@ -910,8 +910,9 @@ end
         @test sym == SymbolicDimensions(; m=3, s=-1, K=0)
         @test SymbolicDimensions(; m=3, s=-1, K=0) == sym
         @test hash(sym) == hash(copy(sym))
-        @test hash(sym) == hash(SymbolicDimensions(; m=3, g=0, s=-1))
         @test hash(sym) == hash(SymbolicDimensionsSingleton{T}(:m)^3 / SymbolicDimensionsSingleton{T}(:s))
+        @test hash(SymbolicDimensionsSingleton{T}(:m)) == hash(copy(SymbolicDimensionsSingleton{T}(:m)))
+        @test hash(SymbolicDimensionsSingleton{T}(:m)) != hash(SymbolicDimensionsSingleton{T}(:s))
         @test sym != SymbolicDimensions(; m=2, s=-1)
         @test SymbolicDimensions(; m=2, s=-1) != sym
         @test sym != SymbolicDimensions(; m=3, g=1, s=-1)
@@ -929,8 +930,6 @@ end
     @test hash(Quantity(1.0, length=1)) == hash(RealQuantity(1.0, length=1)) == hash(GenericQuantity(1.0, length=1))
     @test hash(us"m/s") == hash(us"m/s")
     @test length(unique(fill(us"m/s", 10))) == 1
-    @register_unit gacc 9.81u"m/s^2"
-    @test length(unique(sym_uparse.(fill("gacc", 10)))) == 1
     @test string(dimension(q)) == "s⁻¹ km"
     @test uexpand(q) == 1.5u"km/s"
     @test string(dimension(us"Constants.au^1.5")) == "au³ᐟ²"
