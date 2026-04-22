@@ -975,6 +975,10 @@ end
     sym5 = dimension(us"km/s")
     @test_throws "my_special_symbol is not available as a symbol" sym5.my_special_symbol
 
+    # Exercise the no-module SymbolicUnits wrappers directly.
+    @test DynamicQuantities.SymbolicUnits.lookup_unit(:m) == us"m"
+    @test DynamicQuantities.SymbolicUnits.lookup_constant(:c) == us"Constants.c"
+
     # Test deprecated method
     q = 1.5us"km/s"
     @test expand_units(q) == uexpand(q)
