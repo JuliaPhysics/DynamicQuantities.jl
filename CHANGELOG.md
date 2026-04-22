@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.2](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.1...v1.12.2) (2026-04-22)
+
+
+### Bug Fixes
+
+* hash symbolic quantities structurally ([#213](https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/213)) ([98e91fc](https://github.com/JuliaPhysics/DynamicQuantities.jl/commit/98e91fc251281a13cc17760b9f90f93ba483c261))
+
 ## [1.12.1](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.0...v1.12.1) (2026-03-30)
 
 
