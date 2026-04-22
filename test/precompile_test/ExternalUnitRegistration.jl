@@ -15,8 +15,8 @@ symbolic_mywb() = 1us"MyWb"
         @test :MyWb ∈ collection
     end
 
-    w = expanded_mywb()
-    ws = symbolic_mywb()
+    w = u"MyWb"
+    ws = us"MyWb"
     @test w isa DEFAULT_QUANTITY_TYPE
     @test ws isa DEFAULT_SYMBOLIC_QUANTITY_OUTPUT_TYPE
     @test w == u"MyWb"
