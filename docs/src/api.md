@@ -6,6 +6,10 @@ with quantities are `ustrip` and `dimension`:
 ```@docs
 ustrip
 dimension
+unit
+isunitless
+isdimensionless
+upreferred
 ```
 
 ## Accessing dimensions
@@ -25,7 +29,7 @@ uamount
 ```@autodocs
 Modules = [DynamicQuantities]
 Pages   = ["utils.jl"]
-Filter  = t -> !(t in [ustrip, dimension, ulength, umass, utime, ucurrent, utemperature, uluminosity, uamount])
+Filter  = t -> !(t in [ustrip, dimension, unit, isunitless, isdimensionless, upreferred, ulength, umass, utime, ucurrent, utemperature, uluminosity, uamount])
 ```
 
 ## Internals
