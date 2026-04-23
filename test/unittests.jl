@@ -2338,12 +2338,15 @@ end
 
 push!(LOAD_PATH, joinpath(@__DIR__, "precompile_test"))
 
-using ExternalUnitRegistration: MyWb, expanded_mywb, symbolic_mywb
+using ExternalUnitRegistration: MYWB_EXPANDED, expanded_constant_mywb, expanded_mywb
+using ExternalUnitRegistration: symbolic_mywb, symbolic_mywb_from_helper
 @testset "Type of External Unit" begin
-    @test MyWb isa DEFAULT_QUANTITY_TYPE
-    @test MyWb/u"m^2*kg*s^-2*A^-1" == 1.0
-    @test expanded_mywb() == MyWb
-    @test uexpand(symbolic_mywb()) == MyWb
+    @test MYWB_EXPANDED isa DEFAULT_QUANTITY_TYPE
+    @test MYWB_EXPANDED / u"m^2*kg*s^-2*A^-1" == 1.0
+    @test expanded_constant_mywb() == MYWB_EXPANDED
+    @test expanded_mywb() == MYWB_EXPANDED
+    @test uexpand(symbolic_mywb()) == MYWB_EXPANDED
+    @test symbolic_mywb_from_helper() == symbolic_mywb()
     @test string(symbolic_mywb()) == "1.0 MyWb"
 end
 
