@@ -87,8 +87,6 @@ function map_to_scope(mod::Module, sym::Symbol)
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
     elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
         return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
-    elseif sym in UNIT_SYMBOLS
-        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
     else
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
     end
