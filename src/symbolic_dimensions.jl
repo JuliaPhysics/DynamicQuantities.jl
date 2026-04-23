@@ -408,6 +408,7 @@ module SymbolicUnits
     using DispatchDoctor: @unstable
 
     import ..UNIT_SYMBOLS
+    import ..Units: BUILTIN_UNIT_SYMBOLS
     import ..CONSTANT_SYMBOLS
     import ..ALL_MAPPING
     import ..SymbolicDimensionsSingleton
@@ -472,7 +473,6 @@ module SymbolicUnits
 
     update_symbolic_unit_values!(w::WriteOnceReadMany) = update_symbolic_unit_values!.(w._raw_data)
     update_symbolic_unit_values!(UNIT_SYMBOLS)
-    const BUILTIN_UNIT_SYMBOLS = Tuple(UNIT_SYMBOLS._raw_data)
 
     # Non-eval version of `update_symbolic_unit_values!` for registering units in
     # an external module.

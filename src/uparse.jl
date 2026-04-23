@@ -7,7 +7,7 @@ import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
 import ..UnionAbstractQuantity
-import ..Units: UNIT_SYMBOLS, UNIT_MAPPING
+import ..Units: BUILTIN_UNIT_SYMBOLS, UNIT_SYMBOLS, UNIT_MAPPING
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
 
@@ -24,7 +24,6 @@ macro generate_units_import()
 end
 
 @generate_units_import
-const BUILTIN_UNIT_SYMBOLS = Tuple(UNIT_SYMBOLS._raw_data)
 
 """
     uparse(s::AbstractString)
