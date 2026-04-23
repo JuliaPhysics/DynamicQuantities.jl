@@ -471,6 +471,7 @@ module SymbolicUnits
 
     update_symbolic_unit_values!(w::WriteOnceReadMany) = update_symbolic_unit_values!.(w._raw_data)
     update_symbolic_unit_values!(UNIT_SYMBOLS)
+    const BUILTIN_UNIT_SYMBOLS = Tuple(UNIT_SYMBOLS._raw_data)
 
     # Non-eval version of `update_symbolic_unit_values!` for registering units in
     # an external module.
@@ -519,39 +520,39 @@ module SymbolicUnits
     end
     map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
     function map_to_scope(mod::Module, sym::Symbol)
-        if !(sym in UNIT_SYMBOLS)
-            if sym in CONSTANT_SYMBOLS
-                throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
-            elseif !_has_quantity_binding(mod, sym)
-                throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
-            end
+        if sym in BUILTIN_UNIT_SYMBOLS
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
+        elseif sym in CONSTANT_SYMBOLS
+            throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
+        elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
+        elseif sym in UNIT_SYMBOLS
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
+        else
+            throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
         end
-        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), mod, QuoteNode(sym))
     end
     map_to_scope(ex) = ex
     map_to_scope(::Module, ex) = ex
 
-    function _has_quantity_binding(mod::Module, sym::Symbol)
-        isdefined(mod, sym) || return false
-        return Core.getglobal(mod, sym) isa UnionAbstractQuantity
+    function _external_quantity_binding(mod::Module, sym::Symbol)
+        return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
     end
-    _unit_update_lock() = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
-    _update_all_values_unlocked(sym, unit) = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)(sym, unit)
-
-    function _ensure_registered(mod::Module, sym::Symbol)
-        lock(_unit_update_lock()) do
-            if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0))) && _has_quantity_binding(mod, sym)
-                unit = Core.getglobal(mod, sym)::UnionAbstractQuantity
-                _update_all_values_unlocked(sym, unit)
+    function _ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+        unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
+        update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
+        lock(unit_update_lock) do
+            if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0)))
+                update_all_values_unlocked(sym, unit)
             end
         end
         return nothing
     end
-    function lookup_unit(mod::Module, ex::Symbol)
-        _ensure_registered(mod, ex)
-        return as_quantity(symbolic_unit_from_symbol(ex))
+    lookup_unit(ex::Symbol) = as_quantity(symbolic_unit_from_symbol(ex))
+    function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+        _ensure_registered_external_unit(sym, unit)
+        return lookup_unit(sym)
     end
-    lookup_unit(ex::Symbol) = lookup_unit(@__MODULE__, ex)
     lookup_constant(ex::Symbol) = as_quantity(symbolic_constant_from_symbol(ex))
 end
 
