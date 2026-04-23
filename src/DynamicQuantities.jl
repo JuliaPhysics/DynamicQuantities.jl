@@ -27,6 +27,7 @@ using DispatchDoctor: @stable
     include("arrays.jl")
     include("units.jl")
     include("constants.jl")
+    include("external_unit_lookup.jl")
     include("uparse.jl")
     include("symbolic_dimensions.jl")
     include("affine_dimensions.jl")

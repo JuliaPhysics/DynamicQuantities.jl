@@ -6,8 +6,10 @@ import ..constructorof
 import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
-import ..UnionAbstractQuantity
-import ..Units: BUILTIN_UNIT_SYMBOLS, UNIT_SYMBOLS, UNIT_MAPPING
+import ..external_quantity_binding
+import ..ensure_registered_external_unit
+import ..lookup_registered_unit
+import ..Units: BUILTIN_UNIT_SYMBOLS, UNIT_SYMBOLS
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
 
@@ -80,14 +82,19 @@ end
 end
 map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
 function map_to_scope(mod::Module, sym::Symbol)
-    if sym in BUILTIN_UNIT_SYMBOLS
-        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
-    elseif sym in CONSTANT_SYMBOLS
+    has_builtin_binding = sym in BUILTIN_UNIT_SYMBOLS
+    has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
+
+    if !has_builtin_binding && sym in CONSTANT_SYMBOLS
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
-    elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
-        return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
-    else
+    elseif !has_builtin_binding && !has_external_binding
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+    end
+
+    if has_builtin_binding
+        return Expr(:call, GlobalRef(parentmodule(@__MODULE__), :lookup_registered_unit), QuoteNode(sym))
+    else
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
     end
 end
 function map_to_scope(ex)
@@ -95,27 +102,10 @@ function map_to_scope(ex)
 end
 map_to_scope(::Module, ex) = ex
 
-function _external_quantity_binding(mod::Module, sym::Symbol)
-    return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
-end
-function _ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
-    unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
-    update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
-    lock(unit_update_lock) do
-        if iszero(get(UNIT_MAPPING, sym, 0))
-            update_all_values_unlocked(sym, unit)
-        end
-    end
-    return nothing
-end
-@unstable function lookup_unit(ex::Symbol)
-    i = get(UNIT_MAPPING, ex, 0)
-    iszero(i) && throw(ArgumentError("Symbol $ex not found in `Units`."))
-    return getfield(parentmodule(@__MODULE__), :ALL_VALUES)[i]
-end
-@unstable function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
-    _ensure_registered_external_unit(sym, unit)
-    return lookup_unit(sym)
+@unstable lookup_unit(ex::Symbol) = lookup_registered_unit(ex)
+@unstable function lookup_external_unit(sym::Symbol, unit)
+    ensure_registered_external_unit(sym, unit)
+    return lookup_registered_unit(sym)
 end
 function lookup_constant(ex::Symbol)
     i = findfirst(==(ex), CONSTANT_SYMBOLS)::Int

@@ -418,8 +418,8 @@ module SymbolicUnits
     import ..DEFAULT_VALUE_TYPE
     import ..DEFAULT_DIM_BASE_TYPE
     import ..INDEX_TYPE
-    import ..UnitsParse: _ensure_registered_external_unit, _external_quantity_binding
-    import ..UnionAbstractQuantity
+    import ..ensure_registered_external_unit
+    import ..external_quantity_binding
     import ..WriteOnceReadMany
     import ..disambiguate_constant_symbol
 
@@ -521,22 +521,27 @@ module SymbolicUnits
     end
     map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
     function map_to_scope(mod::Module, sym::Symbol)
-        if sym in BUILTIN_UNIT_SYMBOLS
-            return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
-        elseif sym in CONSTANT_SYMBOLS
+        has_builtin_binding = sym in BUILTIN_UNIT_SYMBOLS
+        has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
+
+        if !has_builtin_binding && sym in CONSTANT_SYMBOLS
             throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
-        elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
-            return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
-        else
+        elseif !has_builtin_binding && !has_external_binding
             throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+        end
+
+        if has_builtin_binding
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
+        else
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
         end
     end
     map_to_scope(ex) = ex
     map_to_scope(::Module, ex) = ex
 
     lookup_unit(ex::Symbol) = as_quantity(symbolic_unit_from_symbol(ex))
-    function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
-        _ensure_registered_external_unit(sym, unit)
+    function lookup_external_unit(sym::Symbol, unit)
+        ensure_registered_external_unit(sym, unit)
         return lookup_unit(sym)
     end
     lookup_constant(ex::Symbol) = as_quantity(symbolic_constant_from_symbol(ex))
