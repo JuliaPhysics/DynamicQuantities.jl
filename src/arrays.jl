@@ -318,6 +318,9 @@ end
 function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V<:Array{T,N},ElType}
     return similar(Array{ElType}, axes(bc))
 end
+function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V<:AbstractRange,ElType}
+    return similar(Array{ElType}, axes(bc))
+end
 function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V,ElType}
     # To deal with things like StaticArrays, we need to rely on
     # only `similar(::Type{ArrayType}, axes)`. We can't specify the
