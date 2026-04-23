@@ -519,14 +519,12 @@ module SymbolicUnits
     end
     map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
     function map_to_scope(mod::Module, sym::Symbol)
-        if sym in UNIT_SYMBOLS
-            # return at end
-        elseif sym in CONSTANT_SYMBOLS
-            throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
-        elseif _has_quantity_binding(mod, sym)
-            # return at end
-        else
-            throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+        if !(sym in UNIT_SYMBOLS)
+            if sym in CONSTANT_SYMBOLS
+                throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
+            elseif !_has_quantity_binding(mod, sym)
+                throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+            end
         end
         return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), mod, QuoteNode(sym))
     end
