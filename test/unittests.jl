@@ -482,6 +482,19 @@ end
         @test RealQuantity(us"inch") * (1.0:4.0) isa QuantityArray
     end
 
+    @testset "Broadcasting over QuantityArray with StepRangeLen backing" begin
+        struct WrappedQuantity{T}
+            value::T
+        end
+
+        t = QuantityArray(range(1.0, step=0.1, length=10), u"s")
+        wrapped = WrappedQuantity.(t)
+
+        @test wrapped isa Vector{WrappedQuantity{Quantity{Float64,typeof(dimension(u"s"))}}}
+        @test first(wrapped).value == first(t)
+        @test last(wrapped).value == last(t)
+    end
+
     @testset "Array of quantities multiplication behavior" begin
         # Test that array of quantities * quantity does NOT create nested QuantityArray
         # but instead broadcasts properly
