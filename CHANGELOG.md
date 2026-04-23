@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.3](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.2...v1.12.3) (2026-04-23)
+
+
+### Bug Fixes
+
+* handle broadcast allocation for range-backed QuantityArray ([#218](https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/218)) ([fcb754c](https://github.com/JuliaPhysics/DynamicQuantities.jl/commit/fcb754ce6eafe1a3ecf67ab3abdbd5c2ec3a1d17))
+
 ## [1.12.2](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.1...v1.12.2) (2026-04-22)
 
 
