@@ -532,15 +532,17 @@ module SymbolicUnits
     map_to_scope(::Module, ex) = ex
 
     function _has_quantity_binding(mod::Module, sym::Symbol)
-        return isdefined(mod, sym) && Base.invokelatest(getproperty, mod, sym) isa UnionAbstractQuantity
+        isdefined(mod, sym) || return false
+        return Core.getglobal(mod, sym) isa UnionAbstractQuantity
     end
+    _unit_update_lock() = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
+    _update_all_values_unlocked(sym, unit) = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)(sym, unit)
+
     function _ensure_registered(mod::Module, sym::Symbol)
-        unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
-        update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
-        lock(unit_update_lock) do
+        lock(_unit_update_lock()) do
             if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0))) && _has_quantity_binding(mod, sym)
-                unit = Base.invokelatest(getproperty, mod, sym)
-                Base.invokelatest(update_all_values_unlocked, sym, unit)
+                unit = Core.getglobal(mod, sym)::UnionAbstractQuantity
+                _update_all_values_unlocked(sym, unit)
             end
         end
         return nothing
