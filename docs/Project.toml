@@ -5,3 +5,9 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 [compat]
 # TODO: update when https://github.com/MakieOrg/Makie.jl/pull/5137 merged
 CairoMakie = "0.15.3"
+
+[extras]
+NestedNumbers = "1f6363f3-4ba7-41a3-bcac-d685ef427933"
+
+[sources]
+NestedNumbers = {url = "https://github.com/JuliaMath/NestedNumbers.jl"}
