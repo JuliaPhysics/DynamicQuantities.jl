@@ -24,6 +24,7 @@ macro generate_units_import()
 end
 
 @generate_units_import
+const BUILTIN_UNIT_SYMBOLS = Tuple(UNIT_SYMBOLS._raw_data)
 
 """
     uparse(s::AbstractString)
@@ -80,12 +81,14 @@ end
 end
 map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
 function map_to_scope(mod::Module, sym::Symbol)
-    if sym in UNIT_SYMBOLS
+    if sym in BUILTIN_UNIT_SYMBOLS
         return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
     elseif sym in CONSTANT_SYMBOLS
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
     elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
         return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
+    elseif sym in UNIT_SYMBOLS
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
     else
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
     end
@@ -108,12 +111,12 @@ function _ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuanti
     end
     return nothing
 end
-function lookup_unit(ex::Symbol)
+@unstable function lookup_unit(ex::Symbol)
     i = get(UNIT_MAPPING, ex, 0)
     iszero(i) && throw(ArgumentError("Symbol $ex not found in `Units`."))
     return getfield(parentmodule(@__MODULE__), :ALL_VALUES)[i]
 end
-function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+@unstable function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
     _ensure_registered_external_unit(sym, unit)
     return lookup_unit(sym)
 end
