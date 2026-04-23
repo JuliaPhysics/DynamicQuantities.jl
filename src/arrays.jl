@@ -315,11 +315,13 @@ function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QA}}, ::Typ
     first_output::ElType = materialize_first(bc)
     return QuantityArray(output_array, dimension(first_output)::dim_type(ElType), ElType)
 end
-function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V<:Array{T,N},ElType}
-    return similar(Array{ElType}, axes(bc))
-end
-function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V<:AbstractRange,ElType}
-    return similar(Array{ElType}, axes(bc))
+for VSupertype in (:(Array{T,N}), :(AbstractRange{T}))
+    @eval function Base.similar(
+        bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}},
+        ::Type{ElType},
+    ) where {T,N,D,Q,V<:$VSupertype,ElType}
+        return similar(Array{ElType}, axes(bc))
+    end
 end
 function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{QuantityArray{T,N,D,Q,V}}}, ::Type{ElType}) where {T,N,D,Q,V,ElType}
     # To deal with things like StaticArrays, we need to rely on
