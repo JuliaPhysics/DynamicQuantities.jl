@@ -519,10 +519,12 @@ module SymbolicUnits
     end
     map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
     function map_to_scope(mod::Module, sym::Symbol)
-        if sym in UNIT_SYMBOLS || _has_quantity_binding(mod, sym)
+        if sym in UNIT_SYMBOLS
             # return at end
         elseif sym in CONSTANT_SYMBOLS
             throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
+        elseif _has_quantity_binding(mod, sym)
+            # return at end
         else
             throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
         end
@@ -535,10 +537,13 @@ module SymbolicUnits
         return isdefined(mod, sym) && Base.invokelatest(getproperty, mod, sym) isa UnionAbstractQuantity
     end
     function _ensure_registered(mod::Module, sym::Symbol)
-        if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0))) && _has_quantity_binding(mod, sym)
-            update_all_values = getfield(parentmodule(@__MODULE__), :update_all_values)
-            unit = Base.invokelatest(getproperty, mod, sym)
-            Base.invokelatest(update_all_values, sym, unit)
+        unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
+        update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
+        lock(unit_update_lock) do
+            if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0))) && _has_quantity_binding(mod, sym)
+                unit = Base.invokelatest(getproperty, mod, sym)
+                Base.invokelatest(update_all_values_unlocked, sym, unit)
+            end
         end
         return nothing
     end

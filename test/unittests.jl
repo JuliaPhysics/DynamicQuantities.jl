@@ -710,6 +710,13 @@ end
     @test_throws "Symbol c found in `Constants` but not `Units`" sym_uparse("c")
     @test_throws "Unexpected expression" sym_uparse("import ..Units")
     @test_throws "Unexpected expression" sym_uparse("(m, m)")
+
+    @eval module SymbolicUnitShadowingTest
+        using DynamicQuantities
+        const c = 1u"m"
+    end
+    @test_throws "Symbol c found in `Constants` but not `Units`" Core.eval(SymbolicUnitShadowingTest, :(us"c"))
+    @test Core.eval(SymbolicUnitShadowingTest, :(us"Constants.c")) == us"Constants.c"
 end
 
 @testset "Constants" begin
@@ -2348,6 +2355,23 @@ using ExternalUnitRegistration: symbolic_mywb, symbolic_mywb_from_helper
     @test uexpand(symbolic_mywb()) == MYWB_EXPANDED
     @test symbolic_mywb_from_helper() == symbolic_mywb()
     @test string(symbolic_mywb()) == "1.0 MyWb"
+end
+
+@testset "Concurrent first-use registration" begin
+    if Threads.nthreads() > 1
+        @eval module SymbolicUnitConcurrentRegistrationTest
+            using DynamicQuantities
+            const ConcurrentFooUnitForLazyRegistration = 1u"m"
+            parse_concurrent_symbol() = us"ConcurrentFooUnitForLazyRegistration"
+        end
+
+        results = Vector{Any}(undef, Threads.nthreads())
+        Threads.@threads for i in eachindex(results)
+            results[i] = SymbolicUnitConcurrentRegistrationTest.parse_concurrent_symbol()
+        end
+
+        @test all(x -> uexpand(x) == 1u"m", results)
+    end
 end
 
 pop!(LOAD_PATH)
