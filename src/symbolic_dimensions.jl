@@ -417,6 +417,7 @@ module SymbolicUnits
     import ..DEFAULT_VALUE_TYPE
     import ..DEFAULT_DIM_BASE_TYPE
     import ..INDEX_TYPE
+    import ..UnitsParse: _ensure_registered_external_unit, _external_quantity_binding
     import ..UnionAbstractQuantity
     import ..WriteOnceReadMany
     import ..disambiguate_constant_symbol
@@ -535,19 +536,6 @@ module SymbolicUnits
     map_to_scope(ex) = ex
     map_to_scope(::Module, ex) = ex
 
-    function _external_quantity_binding(mod::Module, sym::Symbol)
-        return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
-    end
-    function _ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
-        unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
-        update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
-        lock(unit_update_lock) do
-            if iszero(get(ALL_MAPPING, sym, INDEX_TYPE(0)))
-                update_all_values_unlocked(sym, unit)
-            end
-        end
-        return nothing
-    end
     lookup_unit(ex::Symbol) = as_quantity(symbolic_unit_from_symbol(ex))
     function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
         _ensure_registered_external_unit(sym, unit)

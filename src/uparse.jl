@@ -6,7 +6,8 @@ import ..constructorof
 import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
-import ..Units: UNIT_SYMBOLS, UNIT_VALUES
+import ..UnionAbstractQuantity
+import ..Units: UNIT_SYMBOLS, UNIT_MAPPING
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
 
@@ -59,28 +60,32 @@ the quantity corresponding to the speed of light multiplied by Hertz,
 squared.
 """
 macro u_str(s)
-    ex = map_to_scope(Meta.parse(s))
+    ex = map_to_scope(__module__, Meta.parse(s))
     ex = :($as_quantity($ex))
     return esc(ex)
 end
 
-@unstable function map_to_scope(ex::Expr)
+@unstable map_to_scope(ex::Expr) = map_to_scope(@__MODULE__, ex)
+@unstable function map_to_scope(mod::Module, ex::Expr)
     if !(ex.head == :call) && !(ex.head == :. && ex.args[1] == :Constants)
         throw(ArgumentError("Unexpected expression: $ex. Only `:call` and `:.` (for `Constants`) are expected."))
     end
     if ex.head == :call
-        ex.args[2:end] = map(map_to_scope, ex.args[2:end])
+        ex.args[2:end] = map(arg -> map_to_scope(mod, arg), ex.args[2:end])
         return ex
     else # if ex.head == :. && ex.args[1] == :Constants
         @assert ex.args[2] isa QuoteNode
-        return lookup_constant(ex.args[2].value)
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_constant), QuoteNode(ex.args[2].value))
     end
 end
-function map_to_scope(sym::Symbol)
+map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
+function map_to_scope(mod::Module, sym::Symbol)
     if sym in UNIT_SYMBOLS
-        return lookup_unit(sym)
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
     elseif sym in CONSTANT_SYMBOLS
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
+    elseif !(mod === @__MODULE__) && _external_quantity_binding(mod, sym)
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
     else
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
     end
@@ -88,9 +93,29 @@ end
 function map_to_scope(ex)
     return ex
 end
+map_to_scope(::Module, ex) = ex
+
+function _external_quantity_binding(mod::Module, sym::Symbol)
+    return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
+end
+function _ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+    unit_update_lock = getfield(parentmodule(@__MODULE__), :UNIT_UPDATE_LOCK)
+    update_all_values_unlocked = getfield(parentmodule(@__MODULE__), :update_all_values_unlocked)
+    lock(unit_update_lock) do
+        if iszero(get(UNIT_MAPPING, sym, 0))
+            update_all_values_unlocked(sym, unit)
+        end
+    end
+    return nothing
+end
 function lookup_unit(ex::Symbol)
-    i = findfirst(==(ex), UNIT_SYMBOLS)::Int
-    return UNIT_VALUES[i]
+    i = get(UNIT_MAPPING, ex, 0)
+    iszero(i) && throw(ArgumentError("Symbol $ex not found in `Units`."))
+    return getfield(parentmodule(@__MODULE__), :ALL_VALUES)[i]
+end
+function lookup_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+    _ensure_registered_external_unit(sym, unit)
+    return lookup_unit(sym)
 end
 function lookup_constant(ex::Symbol)
     i = findfirst(==(ex), CONSTANT_SYMBOLS)::Int
