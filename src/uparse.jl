@@ -1,3 +1,22 @@
+function external_quantity_binding(mod::Module, sym::Symbol)
+    return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
+end
+
+function ensure_registered_external_unit(sym::Symbol, unit::UnionAbstractQuantity)
+    lock(UNIT_UPDATE_LOCK) do
+        if iszero(get(UNIT_MAPPING, sym, 0))
+            update_all_values_unlocked(sym, unit)
+        end
+    end
+    return nothing
+end
+
+function lookup_registered_unit(sym::Symbol)
+    i = get(UNIT_MAPPING, sym, 0)
+    iszero(i) && throw(ArgumentError("Symbol $sym not found in `Units`."))
+    return ALL_VALUES[i]
+end
+
 module UnitsParse
 
 using DispatchDoctor: @unstable
@@ -9,7 +28,7 @@ import ..DEFAULT_VALUE_TYPE
 import ..external_quantity_binding
 import ..ensure_registered_external_unit
 import ..lookup_registered_unit
-import ..Units: BUILTIN_UNIT_SYMBOLS, UNIT_SYMBOLS
+import ..Units: UNIT_SYMBOLS
 import ..Constants: CONSTANT_SYMBOLS, CONSTANT_VALUES
 import ..Constants
 
@@ -82,20 +101,18 @@ end
 end
 map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
 function map_to_scope(mod::Module, sym::Symbol)
-    has_builtin_binding = sym in BUILTIN_UNIT_SYMBOLS
+    has_registered_binding = sym in UNIT_SYMBOLS
     has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
 
-    if !has_builtin_binding && sym in CONSTANT_SYMBOLS
+    if !has_registered_binding && sym in CONSTANT_SYMBOLS
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
-    elseif !has_builtin_binding && !has_external_binding
+    elseif !has_registered_binding && !has_external_binding
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+    elseif has_external_binding
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(mod), QuoteNode(sym))
     end
 
-    if has_builtin_binding
-        return Expr(:call, GlobalRef(parentmodule(@__MODULE__), :lookup_registered_unit), QuoteNode(sym))
-    else
-        return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(sym), GlobalRef(mod, sym))
-    end
+    return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
 end
 function map_to_scope(ex)
     return ex
@@ -103,8 +120,8 @@ end
 map_to_scope(::Module, ex) = ex
 
 @unstable lookup_unit(ex::Symbol) = lookup_registered_unit(ex)
-@unstable function lookup_external_unit(sym::Symbol, unit)
-    ensure_registered_external_unit(sym, unit)
+@unstable function lookup_external_unit(mod::Module, sym::Symbol)
+    ensure_registered_external_unit(sym, getfield(mod, sym))
     return lookup_registered_unit(sym)
 end
 function lookup_constant(ex::Symbol)

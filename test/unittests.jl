@@ -2322,6 +2322,13 @@ end
     MySV = u"MySV"
     MySV2 = u"MySV2"
 
+    @test uparse("MyV") == u"V"
+    @test uparse("MySV") == u"V"
+    @test uparse("MySV2") == u"km/h"
+    @test sym_uparse("MyV") == us"MyV"
+    @test sym_uparse("MySV") == us"MySV"
+    @test sym_uparse("MySV2") == us"MySV2"
+
     @test MyV === u"V"
     @test MyV == us"V"
     @test MySV == us"V"
