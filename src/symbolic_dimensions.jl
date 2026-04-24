@@ -432,7 +432,20 @@ module SymbolicUnits
     import ..DEFAULT_SYMBOLIC_QUANTITY_OUTPUT_TYPE
     import ..DEFAULT_VALUE_TYPE
     import ..DEFAULT_DIM_BASE_TYPE
+    import ..INDEX_TYPE
+    import ..ensure_registered_external_unit
+    import ..external_quantity_binding
     import ..WriteOnceReadMany
+    import ..disambiguate_constant_symbol
+
+    symbolic_unit_from_symbol(unit::Symbol) = constructorof(DEFAULT_SYMBOLIC_QUANTITY_TYPE)(
+        DEFAULT_VALUE_TYPE(1.0),
+        SymbolicDimensionsSingleton{DEFAULT_DIM_BASE_TYPE}(unit)
+    )
+    symbolic_constant_from_symbol(unit::Symbol) = constructorof(DEFAULT_SYMBOLIC_QUANTITY_TYPE)(
+        DEFAULT_VALUE_TYPE(1.0),
+        SymbolicDimensionsSingleton{DEFAULT_DIM_BASE_TYPE}(disambiguate_constant_symbol(unit))
+    )
 
     # Lazily create unit symbols (since there are so many)
     module Constants
@@ -479,11 +492,7 @@ module SymbolicUnits
     # Non-eval version of `update_symbolic_unit_values!` for registering units in
     # an external module.
     function update_external_symbolic_unit_value(unit)
-        unit = constructorof(DEFAULT_SYMBOLIC_QUANTITY_TYPE)(
-            DEFAULT_VALUE_TYPE(1.0),
-            SymbolicDimensionsSingleton{DEFAULT_DIM_BASE_TYPE}(unit)
-        )
-        push!(SYMBOLIC_UNIT_VALUES, unit)
+        push!(SYMBOLIC_UNIT_VALUES, symbolic_unit_from_symbol(unit))
     end
 
     """
@@ -512,39 +521,43 @@ module SymbolicUnits
     as_quantity(x::Number) = convert(DEFAULT_SYMBOLIC_QUANTITY_OUTPUT_TYPE, x)
     as_quantity(x) = error("Unexpected type evaluated: $(typeof(x))")
 
-    @unstable function map_to_scope(ex::Expr)
+    @unstable map_to_scope(ex::Expr) = map_to_scope(@__MODULE__, ex)
+    @unstable function map_to_scope(mod::Module, ex::Expr)
         if !(ex.head == :call) && !(ex.head == :. && ex.args[1] == :Constants)
             throw(ArgumentError("Unexpected expression: $ex. Only `:call` and `:.` (for `SymbolicConstants`) are expected."))
         end
         if ex.head == :call
-            ex.args[2:end] = map(map_to_scope, ex.args[2:end])
+            ex.args[2:end] = map(arg -> map_to_scope(mod, arg), ex.args[2:end])
             return ex
         else # if ex.head == :. && ex.args[1] == :Constants
             @assert ex.args[2] isa QuoteNode
-            return lookup_constant(ex.args[2].value)
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_constant), QuoteNode(ex.args[2].value))
         end
     end
-    function map_to_scope(sym::Symbol)
-        if sym in UNIT_SYMBOLS
-            # return at end
-        elseif sym in CONSTANT_SYMBOLS
+    map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
+    function map_to_scope(mod::Module, sym::Symbol)
+        has_registered_binding = sym in UNIT_SYMBOLS
+        has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
+
+        if !has_registered_binding && sym in CONSTANT_SYMBOLS
             throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
-        else
+        elseif !has_registered_binding && !has_external_binding
             throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
+        elseif has_external_binding
+            return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(mod), QuoteNode(sym))
         end
+
+        return Expr(:call, GlobalRef(@__MODULE__, :lookup_unit), QuoteNode(sym))
+    end
+    map_to_scope(ex) = ex
+    map_to_scope(::Module, ex) = ex
+
+    lookup_unit(ex::Symbol) = as_quantity(symbolic_unit_from_symbol(ex))
+    function lookup_external_unit(mod::Module, sym::Symbol)
+        ensure_registered_external_unit(sym, getfield(mod, sym))
         return lookup_unit(sym)
     end
-    function map_to_scope(ex)
-        return ex
-    end
-    function lookup_unit(ex::Symbol)
-        i = findfirst(==(ex), UNIT_SYMBOLS)::Int
-        return as_quantity(SYMBOLIC_UNIT_VALUES[i])
-    end
-    function lookup_constant(ex::Symbol)
-        i = findfirst(==(ex), CONSTANT_SYMBOLS)::Int
-        return as_quantity(SYMBOLIC_CONSTANT_VALUES[i])
-    end
+    lookup_constant(ex::Symbol) = as_quantity(symbolic_constant_from_symbol(ex))
 end
 
 import .SymbolicUnits: as_quantity, sym_uparse, SymbolicConstants, map_to_scope
@@ -565,7 +578,7 @@ module. So, for example, `us"Constants.c^2 * Hz^2"` would evaluate to
 namespace collisions, a few physical constants are automatically converted.
 """
 macro us_str(s)
-    ex = map_to_scope(Meta.parse(s))
+    ex = map_to_scope(__module__, Meta.parse(s))
     ex = :($as_quantity($ex))
     return esc(ex)
 end
