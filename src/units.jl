@@ -105,7 +105,7 @@ end
 @_lazy_register_unit Wb V * s
 @_lazy_register_unit M mol / dm^3
 
-@add_prefixes Hz (n, μ, u, m, k, M, G)
+@add_prefixes Hz (n, μ, u, m, k, M, G, T)
 @add_prefixes N (μ, u, m, k)
 @add_prefixes Pa (μ, u, m, k)
 @add_prefixes J (k,)
@@ -123,7 +123,7 @@ end
 
 # SI derived units
 @doc(
-    "Frequency in Hertz. Available variants: `nHz`, `μHz` (/`uHz`), `mHz`, `kHz`, `MHz`, `GHz`.",
+    "Frequency in Hertz. Available variants: `nHz`, `μHz` (/`uHz`), `mHz`, `kHz`, `MHz`, `GHz`, `THz`.",
     Hz,
 )
 @doc(
