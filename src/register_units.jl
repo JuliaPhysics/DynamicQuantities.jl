@@ -4,14 +4,18 @@ import .SymbolicUnits: update_external_symbolic_unit_value
 # Update the unit collections
 const UNIT_UPDATE_LOCK = Threads.SpinLock()
 
+function update_all_values_unlocked(name_symbol, unit)
+    push!(ALL_SYMBOLS, name_symbol)
+    push!(ALL_VALUES, unit)
+    i = lastindex(ALL_VALUES)
+    ALL_MAPPING[name_symbol] = i
+    UNIT_MAPPING[name_symbol] = i
+    update_external_symbolic_unit_value(name_symbol)
+end
+
 function update_all_values(name_symbol, unit)
     lock(UNIT_UPDATE_LOCK) do
-        push!(ALL_SYMBOLS, name_symbol)
-        push!(ALL_VALUES, unit)
-        i = lastindex(ALL_VALUES)
-        ALL_MAPPING[name_symbol] = i
-        UNIT_MAPPING[name_symbol] = i
-        update_external_symbolic_unit_value(name_symbol)
+        update_all_values_unlocked(name_symbol, unit)
     end
 end
 

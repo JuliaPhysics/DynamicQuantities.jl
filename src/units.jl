@@ -302,6 +302,8 @@ end
 # Do not wish to define physical constants, as the number of symbols might lead to ambiguity.
 # The user should define these instead.
 
+const BUILTIN_UNIT_SYMBOLS = Tuple(UNIT_SYMBOLS._raw_data)
+
 # Update `UNIT_MAPPING` with all internally defined unit symbols.
 const UNIT_MAPPING = WriteOnceReadMany(Dict(s => i for (i, s) in enumerate(UNIT_SYMBOLS)))
 
