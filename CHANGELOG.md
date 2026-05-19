@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.3...v1.13.0) (2026-05-18)
+
+
+### Features
+
+* add THz ([#221](https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/221)) ([94c7ff8](https://github.com/JuliaPhysics/DynamicQuantities.jl/commit/94c7ff8c9b3c9ee747be053be57a4ad0cc394217))
+
 ## [1.12.3](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.2...v1.12.3) (2026-04-23)
 
 
