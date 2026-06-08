@@ -24,6 +24,13 @@ function unsafe_isapprox(x, y; kwargs...)
     return isapprox(ustrip(x), ustrip(y); kwargs...) && dimension(x) == dimension(y)
 end
 
+struct ParentWrappedArray{T,N,A<:AbstractArray{T,N}} <: AbstractArray{T,N}
+    parent::A
+end
+Base.parent(A::ParentWrappedArray) = A.parent
+Base.size(A::ParentWrappedArray) = size(parent(A))
+Base.getindex(A::ParentWrappedArray, I...) = parent(A)[I...]
+
 # TODO: This is a bit hacky but is required to avoid ambiguities
 Base.round(::Type{T}, x::SimpleRatio) where {T} = round(T, x.num // x.den)
 
@@ -1294,6 +1301,8 @@ end
             # Test default constructors:
             @test QuantityArray(ones(3), u"m/s") == QuantityArray(ones(3), length=1, time=-1)
             @test typeof(QuantityArray(ones(3), u"m/s")) <: QuantityArray{Float64,1,<:Dimensions,<:constructorof(DEFAULT_QUANTITY_TYPE),<:Array}
+            @test dimension(QuantityArray(Matrix{Float64}(undef, 0, 6), Q(u"s"))) == dimension(Q(u"s"))
+            @test dimension(ParentWrappedArray(QuantityArray(Matrix{Float64}(undef, 0, 6), Q(u"s")))) == dimension(Q(u"s"))
 
             # We can create quantity arrays with generic quantity
             @test typeof(QuantityArray([[1.0], [2.0, 3.0]], dimension(u"m/s"))) <: QuantityArray{<:Any,1,<:Dimensions,<:GenericQuantity,<:Array}
