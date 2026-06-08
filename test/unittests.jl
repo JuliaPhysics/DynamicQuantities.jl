@@ -1303,6 +1303,7 @@ end
             @test typeof(QuantityArray(ones(3), u"m/s")) <: QuantityArray{Float64,1,<:Dimensions,<:constructorof(DEFAULT_QUANTITY_TYPE),<:Array}
             @test dimension(QuantityArray(Matrix{Float64}(undef, 0, 6), Q(u"s"))) == dimension(Q(u"s"))
             @test dimension(ParentWrappedArray(QuantityArray(Matrix{Float64}(undef, 0, 6), Q(u"s")))) == dimension(Q(u"s"))
+            @test DynamicQuantities._parent_dimension(Quantity[]) === nothing
 
             # We can create quantity arrays with generic quantity
             @test typeof(QuantityArray([[1.0], [2.0, 3.0]], dimension(u"m/s"))) <: QuantityArray{<:Any,1,<:Dimensions,<:GenericQuantity,<:Array}
@@ -2371,4 +2372,3 @@ using ExternalUnitRegistration: MyWb
 end
 
 pop!(LOAD_PATH)
-
