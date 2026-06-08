@@ -1,3 +1,20 @@
+const EXTERNAL_UNIT_DECLARATION_LOCK = Threads.SpinLock()
+const EXTERNAL_UNIT_DECLARATIONS = IdDict{Module,Set{Symbol}}()
+
+function declare_external_unit(mod::Module, name::Symbol)
+    lock(EXTERNAL_UNIT_DECLARATION_LOCK) do
+        push!(get!(() -> Set{Symbol}(), EXTERNAL_UNIT_DECLARATIONS, mod), name)
+    end
+    return nothing
+end
+
+function external_unit_declaration(mod::Module, name::Symbol)
+    lock(EXTERNAL_UNIT_DECLARATION_LOCK) do
+        declarations = get(EXTERNAL_UNIT_DECLARATIONS, mod, nothing)
+        return declarations !== nothing && name in declarations
+    end
+end
+
 function external_quantity_binding(mod::Module, sym::Symbol)
     return isdefined(mod, sym) && getfield(mod, sym) isa UnionAbstractQuantity
 end
@@ -26,6 +43,7 @@ import ..DEFAULT_QUANTITY_TYPE
 import ..DEFAULT_DIM_TYPE
 import ..DEFAULT_VALUE_TYPE
 import ..external_quantity_binding
+import ..external_unit_declaration
 import ..ensure_registered_external_unit
 import ..lookup_registered_unit
 import ..Units: UNIT_SYMBOLS
@@ -102,7 +120,9 @@ end
 map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
 function map_to_scope(mod::Module, sym::Symbol)
     has_registered_binding = sym in UNIT_SYMBOLS
-    has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
+    has_external_binding = !(mod === @__MODULE__) && (
+        external_quantity_binding(mod, sym) || external_unit_declaration(mod, sym)
+    )
 
     if !has_registered_binding && sym in CONSTANT_SYMBOLS
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))

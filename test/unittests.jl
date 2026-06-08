@@ -2293,9 +2293,6 @@ end
     @test_throws DimensionError x^y
 end
 
-# `@testset` rewrites the test block with a `let...end`, resulting in an invalid
-# local `const` (ref: src/units.jl:26). To avoid it, register units outside the
-# test block.
 map_count_before_registering = length(UNIT_MAPPING)
 all_map_count_before_registering = length(ALL_MAPPING)
 
@@ -2312,10 +2309,10 @@ if :MySV2 ∉ UNIT_SYMBOLS
     @eval @register_unit MySV2 us"km/h"
 end
 
-@test_throws "Unit `m` is already defined as `1.0 m`" esc(_register_unit(:m, u"s"))
+@test_throws "Unit `m` is already defined as `1.0 m`" esc(_register_unit(@__MODULE__, :m, u"s"))
 
 # Constants as well:
-@test_throws "Unit `Ryd` is already defined" esc(_register_unit(:Ryd, u"Constants.Ryd"))
+@test_throws "Unit `Ryd` is already defined" esc(_register_unit(@__MODULE__, :Ryd, u"Constants.Ryd"))
 
 @testset "Register Unit" begin
     MyV = u"MyV"
@@ -2355,6 +2352,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "precompile_test"))
 using ExternalUnitRegistration: MYWB_EXPANDED, MyWb
 using ExternalUnitRegistration: expanded_constant_mywb, expanded_mywb, expanded_mywb_from_helper
 using ExternalUnitRegistration: symbolic_mywb, symbolic_mywb_from_helper
+using ExternalUnitRegistration: init_expanded_mywb, init_symbolic_mywb
 @testset "Type of External Unit" begin
     @test MYWB_EXPANDED isa DEFAULT_QUANTITY_TYPE
     @test MYWB_EXPANDED / u"m^2*kg*s^-2*A^-1" == 1.0
@@ -2368,6 +2366,9 @@ using ExternalUnitRegistration: symbolic_mywb, symbolic_mywb_from_helper
     @test uexpand(symbolic_mywb()) == MYWB_EXPANDED
     @test symbolic_mywb_from_helper() == symbolic_mywb()
     @test string(symbolic_mywb()) == "1.0 MyWb"
+    @test init_expanded_mywb() == MYWB_EXPANDED
+    @test uexpand(init_symbolic_mywb()) == MYWB_EXPANDED
+    @test string(init_symbolic_mywb()) == "1.0 MyInitWb"
 end
 
 @testset "Concurrent first-use registration" begin

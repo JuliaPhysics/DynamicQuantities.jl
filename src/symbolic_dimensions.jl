@@ -418,6 +418,7 @@ module SymbolicUnits
     import ..INDEX_TYPE
     import ..ensure_registered_external_unit
     import ..external_quantity_binding
+    import ..external_unit_declaration
     import ..WriteOnceReadMany
     import ..disambiguate_constant_symbol
 
@@ -520,7 +521,9 @@ module SymbolicUnits
     map_to_scope(sym::Symbol) = map_to_scope(@__MODULE__, sym)
     function map_to_scope(mod::Module, sym::Symbol)
         has_registered_binding = sym in UNIT_SYMBOLS
-        has_external_binding = !(mod === @__MODULE__) && external_quantity_binding(mod, sym)
+        has_external_binding = !(mod === @__MODULE__) && (
+            external_quantity_binding(mod, sym) || external_unit_declaration(mod, sym)
+        )
 
         if !has_registered_binding && sym in CONSTANT_SYMBOLS
             throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `us\"Constants.$sym\"` instead."))
