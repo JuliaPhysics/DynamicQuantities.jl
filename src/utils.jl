@@ -439,7 +439,22 @@ Get the dimensions of a quantity, returning an `AbstractDimensions` object.
 """
 dimension(q::UnionAbstractQuantity) = q.dimensions
 dimension(d::AbstractDimensions) = d
-dimension(aq::AbstractArray{<:UnionAbstractQuantity}) = allequal(dimension.(aq)) ? dimension(first(aq)) : throw(DimensionError(aq[begin], aq[begin+1:end]))
+_parent_dimension(::Array{<:UnionAbstractQuantity}) = nothing
+@unstable function _parent_dimension(aq::AbstractArray{<:UnionAbstractQuantity})
+    p = parent(aq)
+    if p === aq || !(p isa AbstractArray{<:UnionAbstractQuantity})
+        return nothing
+    end
+
+    return dimension(p)
+end
+function dimension(aq::AbstractArray{<:UnionAbstractQuantity})
+    if isempty(aq)
+        d = _parent_dimension(aq)
+        d === nothing || return d
+    end
+    return allequal(dimension.(aq)) ? dimension(first(aq)) : throw(DimensionError(aq[begin], aq[begin+1:end]))
+end
 dimension(_) = DEFAULT_DIMENSIONLESS_TYPE()
 
 """
