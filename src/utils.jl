@@ -436,7 +436,6 @@ Return `true` if `x` has no dimensions.
     Like Unitful.jl, `isunitless` is only defined for scalars. For arrays, use broadcasting:
     `isunitless.(x)`.
 
-See also [`isdimensionless`](@ref).
 """
 isunitless(x::Number) = iszero(dimension(x))
 isunitless(x::AbstractGenericQuantity) = iszero(dimension(x))
