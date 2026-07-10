@@ -2333,6 +2333,7 @@ end
     @test sym_uparse("MySV") == us"MySV"
     @test sym_uparse("MySV2") == us"MySV2"
     @test @inferred(DynamicQuantities.update_all_values(:MyV, u"V")) === nothing
+    @test_throws "Unit `MyV` is already defined as" DynamicQuantities.update_all_values(:MyV, u"s")
 
     @test MyV === u"V"
     @test MyV == us"V"
