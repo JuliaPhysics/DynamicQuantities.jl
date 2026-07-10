@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.13.0...v1.14.0) (2026-07-10)
+
+
+### Features
+
+* add some more (astro)angle aliases ([#229](https://github.com/JuliaPhysics/DynamicQuantities.jl/issues/229)) ([3d6b8ef](https://github.com/JuliaPhysics/DynamicQuantities.jl/commit/3d6b8ef5834cad9f02caff4f8e6f7a5424945960))
+
 ## [1.13.0](https://github.com/JuliaPhysics/DynamicQuantities.jl/compare/v1.12.3...v1.13.0) (2026-05-18)
 
 
