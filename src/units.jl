@@ -242,7 +242,7 @@ end
 @add_prefixes sr ()
 
 @doc(
-    "Angle in radians. Note that the SI definition is simply 1 rad = 1, so use symbolic units to avoid this. Available variants: `nrad`, `μrad` (/`urad`), `mrad`, `deg`, `arcmin`, `arcsec`, `μarcsec` (/`uarcsec`), `marcsec`.",
+    "Angle in radians. Note that the SI definition is simply 1 rad = 1, so use symbolic units to avoid this. Available variants: `nrad`, `μrad` (/`urad`), `mrad`, `deg` (/`°`), `arcmin`, `arcsec`, `μarcsec` (/`uarcsec`, `μas`, `uas`), `marcsec` (/`mas`).",
     rad,
 )
 @doc(
@@ -251,12 +251,18 @@ end
 )
 
 @_lazy_register_unit deg pi / 180 * rad
+@_lazy_register_unit ° deg
 @_lazy_register_unit arcmin deg / 60
 @_lazy_register_unit arcsec arcmin / 60
 
 @add_prefixes deg ()
 @add_prefixes arcmin ()
 @add_prefixes arcsec (μ, u, m)
+
+# Standard astronomy abbreviations for (sub)arcsecond angles
+@_lazy_register_unit μas μarcsec
+@_lazy_register_unit uas uarcsec
+@_lazy_register_unit mas marcsec
 
 ## Magnetic flux densities
 @_lazy_register_unit Gauss 1e-4 * T
