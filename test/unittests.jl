@@ -703,6 +703,17 @@ end
     @test ustrip(z) ≈ 60 * 60 * 24 * 365.25
     @test z == uparse("yr")
 
+    # `°` is an alias for `deg`
+    @test u"°" === u"deg"
+    @test u"90°" ≈ u"rad" * π / 2
+    @test uexpand(us"°") == uexpand(us"deg")
+
+    # `mas`/`μas`/`uas` are astronomy aliases for (sub)arcsecond angles
+    @test u"mas" === u"marcsec"
+    @test u"μas" === u"μarcsec"
+    @test u"uas" === u"uarcsec"
+    @test u"μas" === u"uas"
+
     # Test type stability of extreme range of units
     @test typeof(u"1") == DEFAULT_QUANTITY_TYPE
     @test typeof(u"1f0") == DEFAULT_QUANTITY_TYPE
