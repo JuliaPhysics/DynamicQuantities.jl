@@ -734,6 +734,20 @@ end
     @test_throws "Symbol c found in `Constants` but not `Units`" sym_uparse("c")
     @test_throws "Unexpected expression" sym_uparse("import ..Units")
     @test_throws "Unexpected expression" sym_uparse("(m, m)")
+
+    @eval module SymbolicUnitShadowingTest
+        using DynamicQuantities
+        const c = 1u"m"
+    end
+    expanded_unit = DynamicQuantities.UnitsParse.map_to_scope(SymbolicUnitShadowingTest, :m)
+    @test expanded_unit.args[1].mod === DynamicQuantities.UnitsParse
+    @test expanded_unit.args[1].name === :lookup_unit
+    expanded_symbolic_unit =
+        DynamicQuantities.SymbolicUnits.map_to_scope(SymbolicUnitShadowingTest, :m)
+    @test expanded_symbolic_unit.args[1].mod === DynamicQuantities.SymbolicUnits
+    @test expanded_symbolic_unit.args[1].name === :lookup_unit
+    @test_throws "Symbol c found in `Constants` but not `Units`" Core.eval(SymbolicUnitShadowingTest, :(us"c"))
+    @test Core.eval(SymbolicUnitShadowingTest, :(us"Constants.c")) == us"Constants.c"
 end
 
 @testset "Constants" begin
@@ -1006,6 +1020,10 @@ end
     # Helpful error if symbol not found:
     sym5 = dimension(us"km/s")
     @test_throws "my_special_symbol is not available as a symbol" sym5.my_special_symbol
+
+    # Exercise the no-module SymbolicUnits wrappers directly.
+    @test DynamicQuantities.SymbolicUnits.lookup_unit(:m) == us"m"
+    @test DynamicQuantities.SymbolicUnits.lookup_constant(:c) == us"Constants.c"
 
     # Test deprecated method
     q = 1.5us"km/s"
@@ -2314,9 +2332,6 @@ end
     @test_throws DimensionError x^y
 end
 
-# `@testset` rewrites the test block with a `let...end`, resulting in an invalid
-# local `const` (ref: src/units.jl:26). To avoid it, register units outside the
-# test block.
 map_count_before_registering = length(UNIT_MAPPING)
 all_map_count_before_registering = length(ALL_MAPPING)
 
@@ -2333,15 +2348,24 @@ if :MySV2 ∉ UNIT_SYMBOLS
     @eval @register_unit MySV2 us"km/h"
 end
 
-@test_throws "Unit `m` is already defined as `1.0 m`" esc(_register_unit(:m, u"s"))
+@test_throws "Unit `m` is already defined as `1.0 m`" esc(_register_unit(@__MODULE__, :m, u"s"))
 
 # Constants as well:
-@test_throws "Unit `Ryd` is already defined" esc(_register_unit(:Ryd, u"Constants.Ryd"))
+@test_throws "Unit `Ryd` is already defined" esc(_register_unit(@__MODULE__, :Ryd, u"Constants.Ryd"))
 
 @testset "Register Unit" begin
     MyV = u"MyV"
     MySV = u"MySV"
     MySV2 = u"MySV2"
+
+    @test uparse("MyV") == u"V"
+    @test uparse("MySV") == u"V"
+    @test uparse("MySV2") == u"km/h"
+    @test sym_uparse("MyV") == us"MyV"
+    @test sym_uparse("MySV") == us"MySV"
+    @test sym_uparse("MySV2") == us"MySV2"
+    @test @inferred(DynamicQuantities.update_all_values(:MyV, u"V")) === nothing
+    @test_throws "Unit `MyV` is already defined as" DynamicQuantities.update_all_values(:MyV, u"s")
 
     @test MyV === u"V"
     @test MyV == us"V"
@@ -2366,11 +2390,43 @@ end
 
 push!(LOAD_PATH, joinpath(@__DIR__, "precompile_test"))
 
-using ExternalUnitRegistration: MyWb
+using ExternalUnitRegistration: MYWB_EXPANDED, MyWb
+using ExternalUnitRegistration: expanded_constant_mywb, expanded_mywb, expanded_mywb_from_helper
+using ExternalUnitRegistration: symbolic_mywb, symbolic_mywb_from_helper
+using ExternalUnitRegistration: init_expanded_mywb, init_symbolic_mywb
 @testset "Type of External Unit" begin
-    @test MyWb isa DEFAULT_QUANTITY_TYPE
-    @test MyWb/u"m^2*kg*s^-2*A^-1" == 1.0
+    @test MYWB_EXPANDED isa DEFAULT_QUANTITY_TYPE
+    @test MYWB_EXPANDED / u"m^2*kg*s^-2*A^-1" == 1.0
+    @test u"MyWb" == MYWB_EXPANDED
+    @test uexpand(us"MyWb") == MYWB_EXPANDED
+    @test string(us"MyWb") == "1.0 MyWb"
+    @test MyWb == MYWB_EXPANDED
+    @test expanded_constant_mywb() == MYWB_EXPANDED
+    @test expanded_mywb() == MYWB_EXPANDED
+    @test expanded_mywb_from_helper() == expanded_mywb()
+    @test uexpand(symbolic_mywb()) == MYWB_EXPANDED
+    @test symbolic_mywb_from_helper() == symbolic_mywb()
+    @test string(symbolic_mywb()) == "1.0 MyWb"
+    @test init_expanded_mywb() == MYWB_EXPANDED
+    @test uexpand(init_symbolic_mywb()) == MYWB_EXPANDED
+    @test string(init_symbolic_mywb()) == "1.0 MyInitWb"
+end
+
+@testset "Concurrent first-use registration" begin
+    if Threads.nthreads() > 1
+        @eval module SymbolicUnitConcurrentRegistrationTest
+            using DynamicQuantities
+            const ConcurrentFooUnitForLazyRegistration = 1u"m"
+            parse_concurrent_symbol() = us"ConcurrentFooUnitForLazyRegistration"
+        end
+
+        results = Vector{Any}(undef, Threads.nthreads())
+        Threads.@threads for i in eachindex(results)
+            results[i] = SymbolicUnitConcurrentRegistrationTest.parse_concurrent_symbol()
+        end
+
+        @test all(x -> uexpand(x) == 1u"m", results)
+    end
 end
 
 pop!(LOAD_PATH)
-
