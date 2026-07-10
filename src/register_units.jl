@@ -13,6 +13,7 @@ function update_all_values_unlocked(name_symbol, unit)
     ALL_MAPPING[name_symbol] = i
     UNIT_MAPPING[name_symbol] = i
     update_external_symbolic_unit_value(name_symbol)
+    return nothing
 end
 
 function update_all_values(name_symbol, unit)
@@ -24,6 +25,7 @@ function update_all_values(name_symbol, unit)
             error("Unit `$name_symbol` is already defined as `$(ALL_VALUES[index])`")
         end
     end
+    return nothing
 end
 
 function define_unit_binding(mod::Module, name::Symbol, unit)

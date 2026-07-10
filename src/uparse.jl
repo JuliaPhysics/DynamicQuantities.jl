@@ -128,7 +128,7 @@ function map_to_scope(mod::Module, sym::Symbol)
         throw(ArgumentError("Symbol $sym found in `Constants` but not `Units`. Please use `u\"Constants.$sym\"` instead."))
     elseif !has_registered_binding && !has_external_binding
         throw(ArgumentError("Symbol $sym not found in `Units` or `Constants`."))
-    elseif has_external_binding
+    elseif !has_registered_binding && has_external_binding
         return Expr(:call, GlobalRef(@__MODULE__, :lookup_external_unit), QuoteNode(mod), QuoteNode(sym))
     end
 

@@ -715,6 +715,13 @@ end
         using DynamicQuantities
         const c = 1u"m"
     end
+    expanded_unit = DynamicQuantities.UnitsParse.map_to_scope(SymbolicUnitShadowingTest, :m)
+    @test expanded_unit.args[1].mod === DynamicQuantities.UnitsParse
+    @test expanded_unit.args[1].name === :lookup_unit
+    expanded_symbolic_unit =
+        DynamicQuantities.SymbolicUnits.map_to_scope(SymbolicUnitShadowingTest, :m)
+    @test expanded_symbolic_unit.args[1].mod === DynamicQuantities.SymbolicUnits
+    @test expanded_symbolic_unit.args[1].name === :lookup_unit
     @test_throws "Symbol c found in `Constants` but not `Units`" Core.eval(SymbolicUnitShadowingTest, :(us"c"))
     @test Core.eval(SymbolicUnitShadowingTest, :(us"Constants.c")) == us"Constants.c"
 end
@@ -2325,6 +2332,7 @@ end
     @test sym_uparse("MyV") == us"MyV"
     @test sym_uparse("MySV") == us"MySV"
     @test sym_uparse("MySV2") == us"MySV2"
+    @test @inferred(DynamicQuantities.update_all_values(:MyV, u"V")) === nothing
 
     @test MyV === u"V"
     @test MyV == us"V"
