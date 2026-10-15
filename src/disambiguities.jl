@@ -1,7 +1,15 @@
-for op in (:isless, :(==), :isequal, :(<)), (type, _, _) in ABSTRACT_QUANTITY_TYPES
+for op in (:(==), :(<)), (type, _, _) in ABSTRACT_QUANTITY_TYPES
     @eval begin
         Base.$(op)(::$type, ::Missing) = missing
         Base.$(op)(::Missing, ::$type) = missing
+    end
+end
+for (type, _, _) in ABSTRACT_QUANTITY_TYPES
+    @eval begin
+        Base.isequal(::$type, ::Missing) = false
+        Base.isequal(::Missing, ::$type) = false
+        Base.isless(::$type, ::Missing) = true
+        Base.isless(::Missing, ::$type) = false
     end
 end
 for op in (:isapprox,), (type, _, _) in ABSTRACT_QUANTITY_TYPES

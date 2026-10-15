@@ -1165,8 +1165,8 @@ end
     @test round(Union{Int32,Missing}, FixedRational{Int32,100}(1)) isa Int32
     @test round(Union{Int32,Missing}, FixedRational{Int32,100}(1)) === Int32(1)
     y = missing
-    @test isless(x, y) === missing
-    @test isless(y, x) === missing
+    @test (x < y) === missing
+    @test (y < x) === missing
     @test (x == y) === missing
     @test (y == x) === missing
     @test isapprox(x, y) === missing
@@ -1176,6 +1176,15 @@ end
     y = missing
     @test x * y === missing
     @test x + y === missing
+
+    @testset "$(typeof(q))" for q in (1.0u"m", 1.0us"mg", RealQuantity(1.0u"m"), GenericQuantity(1.0u"m"))
+        @test isequal(q, missing) === false
+        @test isequal(missing, q) === false
+        @test isless(q, missing) === true
+        @test isless(missing, q) === false
+        @test isequal(sort([missing, 2q, q]), [q, 2q, missing])
+        @test findfirst(isequal(missing), [q, missing]) == 2
+    end
 end
 
 
